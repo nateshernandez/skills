@@ -11,9 +11,10 @@ A spec is the contract between the requester and the build team. The requester a
 
 ## Shape
 
-- **Frontmatter** → `id` (matches the folder), `status`, `size`, optional `retired`
+- **Frontmatter** → `id` (matches the folder), `status`, `size`, optional `mode` and `retired`
   - `status`: `draft` → `approved` → `building` → `verifying` → `done`, or `blocked`
   - `size`: `S` one task, no UI flow · `M` a screen or flow · `L` several screens; consider splitting
+  - `mode`: `standard` or `turbo`; the build skill writes it, and without it the config's `build.mode` applies
 - **Title** → `# <Feature name>`
 - **Outcome** → one line under the title, ≤ 25 words, what's true for the user
 - **`## Decide`** → the guesses; `none` if the request settled everything

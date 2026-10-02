@@ -105,3 +105,4 @@ After the latest round passes and before the report, turn what the build settled
 - Decided without you → choices made after approval, each with a Because
 - Codified → each decision record and rule this build wrote, for the requester to confirm; `none` if empty
 - Open notes → `note` findings still open; `none` if empty
+- Skipped → each step a turbo build cut (turbo.md); only in a turbo build, and required there

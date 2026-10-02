@@ -31,6 +31,10 @@ rounds: <review rounds run>
 
 - **[note] <lens> · <n.Bk or file:line>** → <finding>
 
+## Skipped
+
+- **<step a turbo build cut>** → <what it would have checked>
+
 ## Try it
 
 - `<command that runs the app>` → <where to go and what to do there>

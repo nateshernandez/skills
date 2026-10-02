@@ -9,7 +9,7 @@ import re
 import shlex
 import subprocess
 from pathlib import Path
-from typing import NamedTuple
+from typing import Literal, NamedTuple, get_args
 
 CONFIG_PATH = Path(".claude") / "kit" / "config.json"
 CHECKLISTS_PATH = Path(".claude") / "kit" / "checklists"
@@ -20,7 +20,7 @@ LENSES = ("quality", "ux", "security", "code")
 TOP_LEVEL_FIELDS = frozenset(
     (
         *("check", "check_full", "tests", "app", "screenshots", "audit", "format", "lint"),
-        *("design", "architecture"),
+        *("design", "architecture", "build"),
     )
 )
 DESIGN_FIELDS = frozenset(("guide", "tokens", "gallery", "contrast"))
@@ -31,7 +31,9 @@ ARCHITECTURE_FIELDS = frozenset(
     )
 )
 DEFAULT_MAX_LINES = 250
+BUILD_FIELDS = frozenset(("mode", "turbo_model"))
 TEXT_CONTRAST = 4.5
+SPEC_MODE_RE = re.compile(r"^mode:\s*(\S+)", re.MULTILINE)
 CONTRAST_PAIR_RE = re.compile(r"^([\w-]+) on ([\w-]+)(?: (\d+(?:\.\d+)?))?$")
 
 
@@ -81,6 +83,17 @@ class Architecture(NamedTuple):
     baseline: Path | None
 
 
+BuildMode = Literal["standard", "turbo"]
+
+
+class Build(NamedTuple):
+    mode: BuildMode
+    turbo_model: str | None
+
+
+DEFAULT_BUILD = Build(mode="standard", turbo_model=None)
+
+
 class Config(NamedTuple):
     root: Path
     check: str
@@ -93,6 +106,7 @@ class Config(NamedTuple):
     lint: OnWrite | None
     design: Design | None
     architecture: Architecture | None
+    build: Build
 
     @property
     def specs_dir(self) -> Path:
@@ -166,6 +180,7 @@ def parse(raw: dict, root: Path) -> Config:
         architecture=(
             parse_architecture(raw["architecture"], root) if "architecture" in raw else None
         ),
+        build=parse_build(raw["build"]) if "build" in raw else DEFAULT_BUILD,
     )
 
 
@@ -249,6 +264,27 @@ def parse_design(raw_design: object, root: Path) -> Design:
         gallery=gallery,
         contrast=parse_contrast(raw_design.get("contrast", [])),
     )
+
+
+def parse_build(raw_build: object) -> Build:
+    if not isinstance(raw_build, dict):
+        message = f"{CONFIG_PATH}: `build` must be an object with mode and turbo_model"
+        raise ConfigError(message)
+    unknown_fields = sorted(set(raw_build) - BUILD_FIELDS)
+    if unknown_fields:
+        message = f"{CONFIG_PATH}: unknown build fields {unknown_fields}; see docs/configuration.md"
+        raise ConfigError(message)
+    mode = raw_build.get("mode", DEFAULT_BUILD.mode)
+    if mode not in get_args(BuildMode):
+        message = f"{CONFIG_PATH}: build.mode must be one of {list(get_args(BuildMode))}"
+        raise ConfigError(message)
+    turbo_model = raw_build.get("turbo_model")
+    if turbo_model is not None and not (
+        isinstance(turbo_model, str) and re.fullmatch(r"[\w.:\[\]-]+", turbo_model)
+    ):
+        message = f'{CONFIG_PATH}: build.turbo_model must be a model name like "sonnet"'
+        raise ConfigError(message)
+    return Build(mode, turbo_model)
 
 
 def parse_contrast(raw_pairs: object) -> tuple[ContrastPair, ...]:
@@ -339,6 +375,12 @@ def optional_text(raw: dict, field_name: str) -> str | None:
     if field_name not in raw:
         return None
     return required_text(raw, field_name)
+
+
+def spec_mode(spec_dir: Path) -> str | None:
+    """The spec's own `mode:` field; a spec without one builds in the config's `build.mode`."""
+    mode_match = SPEC_MODE_RE.search((spec_dir / "spec.md").read_text())
+    return mode_match.group(1) if mode_match else None
 
 
 def fill(template: str, **values: str | list[str]) -> str:

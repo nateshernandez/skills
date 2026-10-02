@@ -21,6 +21,7 @@ MAX_IMAGES = 4
 
 STATUSES = ("draft", "approved", "building", "verifying", "done", "blocked")
 SIZES = ("S", "M", "L")
+MODES = ("standard", "turbo")
 SECTION_ORDER = ("Decide", "Behaviors", "Not doing", "Looks like")
 REQUIRED_SECTIONS = ("Decide", "Behaviors", "Not doing")
 ITEM_SECTIONS = {"Decide": "D", "Behaviors": "B"}
@@ -112,6 +113,8 @@ def lint_frontmatter(fields: dict[str, str], folder_name: str) -> list[str]:
         problems.append(f"frontmatter: status must be one of {list(STATUSES)}")
     if fields.get("size") not in SIZES:
         problems.append(f"frontmatter: size must be one of {list(SIZES)}")
+    if fields.get("mode", "standard") not in MODES:
+        problems.append(f"frontmatter: mode must be one of {list(MODES)}")
     return problems
 
 
