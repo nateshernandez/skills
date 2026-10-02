@@ -1,0 +1,20 @@
+line-length = 100
+target-version = "py311"
+
+[lint]
+# D (docstrings everywhere) conflicts with .claude/rules/python-comments.md.
+# T20 (print) is left out: CLI scripts print by design.
+# EM and S101 are left out: EM forces `msg = ...; raise X(msg)`, and assert is how
+# .claude/rules/python-errors.md says to guard internal invariants.
+select = [
+  "E", "F", "W", "I", "B", "UP", "SIM", "RUF", "N", "ANN", "PGH",
+  "C4", "C90", "PERF", "RET", "PTH", "FBT", "TRY", "BLE", "ERA",
+  "PIE", "FURB", "TC", "ARG", "DTZ", "PL", "SLF", "S110", "S112",
+]
+# TRY003 bans descriptive messages on built-in exceptions; PLR2004 flags every literal.
+ignore = ["TRY003", "PLR2004"]
+
+# Only the preview rules named here turn on, not every preview rule.
+preview = true
+explicit-preview-rules = true
+extend-select = ["PLR6301", "PLR1702", "RUF029"]
