@@ -4,7 +4,8 @@
 Usage: check_tokens.py [CSS_FILE ...]
   No files: contrast in the config's `design.tokens`, then raw colours in every tracked .css
   file outside specs/. Given files: the tokens file and anything under specs/ (a prototype) get
-  the contrast check; any other file gets the raw-colour check.
+  the contrast check; any other file gets the raw-colour check. Without `design` in the config,
+  given files all get the contrast check, as a design system's first prototype needs.
 
 Pairs: foreground on background, <name>-foreground on <name>, <name> on <name>-bg, and each
 `design.contrast` entry. docs/configuration.md says how the light and dark themes are read.
@@ -67,10 +68,11 @@ def main() -> int:
     except ConfigError as error:
         print(error, file=sys.stderr)
         return 1
-    if config.design is None:
-        print("no `design` in the config; nothing to check")
+    paths = [Path(arg).resolve() for arg in sys.argv[1:]]
+    if not paths and config.design is None:
+        print("no `design` in the config and no files given; nothing to check")
         return 0
-    paths = [Path(arg).resolve() for arg in sys.argv[1:]] or default_paths(config)
+    paths = paths or default_paths(config)
     problems = [problem for path in paths for problem in check_file(path, config)]
     for problem in problems:
         print(problem)
@@ -97,12 +99,14 @@ def default_paths(config: Config) -> list[Path]:
 
 def check_file(path: Path, config: Config) -> list[str]:
     """Problems in one CSS file, each a line naming the file; `skip` lines aren't failures."""
-    assert config.design is not None
     declarations = parse_declarations(path.read_text())
     shown_path = relative(path, config.root)
-    if path == config.design.tokens or is_spec_file(path, config):
-        return [f"{shown_path}: {problem}" for problem in contrast_problems(declarations, config)]
-    tokens_path = relative(config.design.tokens, config.root)
+    design = config.design
+    if design is None or path == design.tokens or is_spec_file(path, config):
+        configured = design.contrast if design else ()
+        problems = contrast_problems(declarations, configured)
+        return [f"{shown_path}: {problem}" for problem in problems]
+    tokens_path = relative(design.tokens, config.root)
     return [
         f"{shown_path}:{declaration.line}: raw colour in `{declaration.name}: {declaration.value}`;"
         f" define it as a token in {tokens_path} and use var(--token)"
@@ -144,16 +148,17 @@ def make_declaration(chain: tuple[str, ...], piece: str, text: str, start: int) 
     return Declaration(chain, name.strip(), " ".join(value.split()), line)
 
 
-def contrast_problems(declarations: list[Declaration], config: Config) -> list[str]:
-    assert config.design is not None
+def contrast_problems(
+    declarations: list[Declaration], configured: tuple[ContrastPair, ...]
+) -> list[str]:
     themes = read_themes(declarations)
     defined = themes[0].tokens
     problems = [
         f"design.contrast names --{name}, which this file doesn't define"
-        for name in undefined_names(config.design.contrast, defined)
+        for name in undefined_names(configured, defined)
     ]
-    configured = [pair for pair in config.design.contrast if is_defined(pair, defined)]
-    pairs = dict.fromkeys([*named_pairs(defined), *configured])
+    checkable = [pair for pair in configured if is_defined(pair, defined)]
+    pairs = dict.fromkeys([*named_pairs(defined), *checkable])
     for theme in themes:
         problems += theme_problems(pairs, theme)
     return problems
