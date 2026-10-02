@@ -8,6 +8,15 @@ The project's own checklist, `.claude/kit/checklists/code.md`, adds framework an
 - The diff follows every `.claude/rules/` file whose `paths:` match the files it changed
 - `check_decisions.py` passes: no record cites code the diff moved or deleted
 
+## Architecture
+
+When the config has `architecture`, judge against its guide:
+
+- Each new file sits where the guide's question tree puts it; nothing new joins the baseline
+- Routes only build who's asking, call use cases, and render or respond
+- Use cases take who's asking and parse their input; decisions live in `domain/`, storage in `infra/`
+- UI follows the guide's UI code rules: data from the page, changes through actions, effects only to sync with the outside
+
 ## Framework
 
 - Each framework API is used the way its installed docs describe, not the way an older version did

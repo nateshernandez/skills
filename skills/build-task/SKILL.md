@@ -39,6 +39,8 @@ flowchart TD
   - _Because:_ a fresh look beats a fourth guess in the same context
 - **Building UI** → follow the design guide `design.guide` names in the config: the screen's layout, its patterns, components, and tokens
   - _Because:_ one design system keeps screens consistent, and the UX reviewer judges against the guide
+- **Creating a file** → place it by the architecture guide `architecture.guide` names in the config
+  - _Because:_ its question tree gives every file one home; lint and `check_shape.py` fail the others
 - **Tempted to write a decision record or rule** → note the pattern in progress.md; the orchestrator codifies after review
   - _Because:_ records and rules describe reviewed code, not one task's draft
 - **Moved or renamed a file a decision record cites** → update that record's `code:` line only

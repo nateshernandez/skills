@@ -34,7 +34,7 @@ flowchart TD
   D --> E["Write config, folders, CLAUDE.md section"]
   E --> F{"doctor.py --run-check green?"}
   F -- no --> G["Report the red check; stop"]
-  F -- yes --> H["Commit; offer the team setting; suggest /kit:design-system for a UI with no design, else /kit:build"]
+  F -- yes --> H["Commit; offer the team setting; suggest /kit:architecture, and /kit:design-system for a UI, else /kit:build"]
 ```
 
 ## Rules
