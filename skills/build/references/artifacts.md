@@ -86,6 +86,8 @@ After the latest round passes and before the report, turn what the build settled
   - _Because:_ written against reviewed code, a record describes the architecture that exists, not a guess
 - **A pattern the diff set that later code must repeat** → propose it as a rule (write-rule), or a lint config change
   - _Because:_ rules come from code that exists, so they match the architecture instead of predicting it
+- **A second feature reuses a UI piece the first one built** → move it to the shared components, with a section in the design guide and a gallery page
+  - _Because:_ the third feature then finds it in the guide instead of building its own
 - **A pattern appears once and nothing else must follow it** → no rule
   - _Because:_ every rule loads into later sessions; one-off rules are noise
 - **Records and rules written** → commit them together; list each under the report's Codified
