@@ -67,6 +67,17 @@ You touch two files: the spec, before anything is built, and the report, at the 
 
 Each build works on its own branch and leaves a short, linear history: one commit for the spec, one for the tests, one per task, one per review round, and one for the records. Subjects are imperative one-liners, like `Dedupe repeated waitlist joins`. Branches land by rebasing, never by merge commits.
 
+## Architecture
+
+Run `/kit:architecture` once, before or after the design system, so every feature's code lands where the next reader expects it.
+
+1. **Homes.** Routes, business modules, shared UI, platform (database, session, outside services), and pure helpers. Imports flow one way, and code moves to a shared home only when a second module needs it.
+2. **One module shape.** Each module has the same entries and four flat folders: `use-cases/` (what can be done), `domain/` (the rules), `infra/` (storage and outside services), and `components/` (the UI). Imports point inward, so rules test without mocks.
+3. **A spec and a guide.** The architecture spec builds the lint, and `docs/architecture.md` is the contract: a question tree that places any code, examples for each file role, and the UI rules.
+4. **Checks.** The recipe's lint fails a broken boundary on the write. `check_shape.py` fails a file a module has no place for, or a source file past 250 lines.
+
+An existing app keeps working while it moves: its current files go in a baseline that only shrinks, and each move is its own spec. Version 1 has a recipe for Next.js and React.
+
 ## Design systems
 
 For an app with a UI, run `/kit:design-system` once before building features. It needs Mobbin's connector, or screenshots of apps you like.
@@ -83,6 +94,7 @@ The system grows as features need it: a screen the guide doesn't cover gets a de
 | Command | What it does |
 | --- | --- |
 | `/kit:setup` | Writes the config, checks the gate is green, and adds a CLAUDE.md section |
+| `/kit:architecture` | Writes the spec and guide for where your app's code goes, and the checks that hold it there |
 | `/kit:design-system` | Researches a look on Mobbin and writes the specs and guide for your app's design system |
 | `/kit:build` | Runs a feature from request to report, or resumes one |
 | `/kit:write-spec` | Writes a spec on its own, for planning ahead |
@@ -102,6 +114,7 @@ The agents run the rest of the skills: `plan-spec`, `write-acceptance-tests`, `b
 .claude/rules/git-commits.md     commit, branch, and push conventions, unless you have your own
 specs/<NNN>-<slug>/              spec, plan, tasks, progress, reviews, screens, report
 docs/decisions/<NNNN>-<slug>.md  decision records, written after review
+docs/architecture.md             where code goes, if you run /kit:architecture
 docs/design/guide.md, look.md    the design system agents build UI from, if you run /kit:design-system
 tests/acceptance/, tests/probes/ acceptance tests and reviewers' probes (paths are configurable)
 tests/kit/ux-checks.ts           UX checks the UX reviewer runs on every screen, for Playwright apps
