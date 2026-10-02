@@ -30,8 +30,8 @@ jobs:
         run: npm ci && npm run check
       - name: Skills
         run: |
-          python3 scripts/lint_skill.py skills/*/SKILL.md
-          python3 scripts/check_routes.py skills
+          python3 scripts/lint_skill.py skills/*/SKILL.md .claude/skills/*/SKILL.md
+          python3 scripts/check_routes.py skills .claude/skills
       - name: Agents
         run: python3 scripts/lint_agent.py agents/*.md
       - name: Manifests

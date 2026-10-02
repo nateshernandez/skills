@@ -20,8 +20,8 @@ CI runs these on every pull request; run them before pushing:
 ruff check scripts && ruff format --check scripts
 npm ci && npm run check
 uv tool run pyright scripts
-python3 scripts/lint_skill.py skills/*/SKILL.md
-python3 scripts/check_routes.py skills
+python3 scripts/lint_skill.py skills/*/SKILL.md .claude/skills/*/SKILL.md
+python3 scripts/check_routes.py skills .claude/skills
 python3 scripts/lint_agent.py agents/*.md
 claude plugin validate .
 ```
