@@ -5,6 +5,7 @@ Imported by the other scripts; not run on its own. docs/configuration.md documen
 
 import json
 import os
+import re
 import shlex
 import subprocess
 from pathlib import Path
@@ -17,8 +18,11 @@ DECISIONS_PATH = Path("docs") / "decisions"
 RUNNERS = ("playwright", "vitest", "jest")
 LENSES = ("quality", "ux", "security", "code")
 TOP_LEVEL_FIELDS = frozenset(
-    ("check", "check_full", "tests", "app", "screenshots", "audit", "format", "lint")
+    ("check", "check_full", "tests", "app", "screenshots", "audit", "format", "lint", "design")
 )
+DESIGN_FIELDS = frozenset(("guide", "tokens", "gallery", "contrast"))
+TEXT_CONTRAST = 4.5
+CONTRAST_PAIR_RE = re.compile(r"^([\w-]+) on ([\w-]+)(?: (\d+(?:\.\d+)?))?$")
 
 
 class ConfigError(Exception):
@@ -43,6 +47,19 @@ class OnWrite(NamedTuple):
     run: str
 
 
+class ContrastPair(NamedTuple):
+    foreground: str
+    background: str
+    minimum: float
+
+
+class Design(NamedTuple):
+    guide: Path
+    tokens: Path
+    gallery: str | None
+    contrast: tuple[ContrastPair, ...]
+
+
 class Config(NamedTuple):
     root: Path
     check: str
@@ -53,6 +70,7 @@ class Config(NamedTuple):
     audit: str | None
     format: OnWrite | None
     lint: OnWrite | None
+    design: Design | None
 
     @property
     def specs_dir(self) -> Path:
@@ -122,6 +140,7 @@ def parse(raw: dict, root: Path) -> Config:
         audit=optional_text(raw, "audit"),
         format=parse_on_write(raw["format"], "format") if "format" in raw else None,
         lint=parse_on_write(raw["lint"], "lint") if "lint" in raw else None,
+        design=parse_design(raw["design"], root) if "design" in raw else None,
     )
 
 
@@ -185,10 +204,52 @@ def parse_on_write(raw_command: object, field_name: str) -> OnWrite:
     return OnWrite(tuple(extensions), run)
 
 
-def required_text(raw: dict, field_name: str, prefix: str = "") -> str:
+def parse_design(raw_design: object, root: Path) -> Design:
+    if not isinstance(raw_design, dict):
+        message = f"{CONFIG_PATH}: `design` must be an object with guide and tokens"
+        raise ConfigError(message)
+    unknown_fields = sorted(set(raw_design) - DESIGN_FIELDS)
+    if unknown_fields:
+        message = (
+            f"{CONFIG_PATH}: unknown design fields {unknown_fields}; see docs/configuration.md"
+        )
+        raise ConfigError(message)
+    gallery = raw_design.get("gallery")
+    if gallery is not None and not (isinstance(gallery, str) and gallery.startswith("/")):
+        message = f'{CONFIG_PATH}: design.gallery must be a route like "/design"'
+        raise ConfigError(message)
+    return Design(
+        guide=root / required_text(raw_design, "guide", "design.", "a path"),
+        tokens=root / required_text(raw_design, "tokens", "design.", "a path"),
+        gallery=gallery,
+        contrast=parse_contrast(raw_design.get("contrast", [])),
+    )
+
+
+def parse_contrast(raw_pairs: object) -> tuple[ContrastPair, ...]:
+    if not isinstance(raw_pairs, list):
+        message = f'{CONFIG_PATH}: design.contrast must be a list like ["link on background"]'
+        raise ConfigError(message)
+    pairs = []
+    for raw_pair in raw_pairs:
+        match = CONTRAST_PAIR_RE.match(raw_pair) if isinstance(raw_pair, str) else None
+        if match is None:
+            message = (
+                f"{CONFIG_PATH}: design.contrast entry {raw_pair!r} must read"
+                ' "<token> on <token>" with an optional minimum ratio, like "ring on background 3"'
+            )
+            raise ConfigError(message)
+        foreground, background, minimum = match.groups()
+        pairs.append(ContrastPair(foreground, background, float(minimum or TEXT_CONTRAST)))
+    return tuple(pairs)
+
+
+def required_text(
+    raw: dict, field_name: str, prefix: str = "", kind: str = "a command string"
+) -> str:
     value = raw.get(field_name)
     if not isinstance(value, str) or not value.strip():
-        message = f"{CONFIG_PATH}: `{prefix}{field_name}` is required and must be a command string"
+        message = f"{CONFIG_PATH}: `{prefix}{field_name}` is required and must be {kind}"
         raise ConfigError(message)
     return value
 

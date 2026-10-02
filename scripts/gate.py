@@ -5,7 +5,8 @@ The task gate, which every task runs: `check`, then this spec's acceptance tests
 Tests naming a behavior that another unfinished task covers (the current task's own are kept)
 are skipped, and so are the `<n>.outcome` probes, which judge the whole feature. The full gate,
 run once per spec after the last review round: `check_full`, then the spec's acceptance tests
-and probes for every delivered behavior.
+and probes for every delivered behavior. Both run check_tokens.py after the check when the
+config has `design`.
 
 Each step's output goes to `kit-gate-<spec>-<scope>.log` in the temp dir. A red run prints the
 failed step, that path, the failing test titles, and the log's last lines; read the log, don't
@@ -26,6 +27,7 @@ import json
 import os
 import random
 import re
+import shlex
 import socket
 import subprocess
 import sys
@@ -37,6 +39,7 @@ from typing import Literal, NamedTuple
 from kit_config import Config, ConfigError, fill, load, load_if_set_up, relative
 
 BUILDER_AGENT = "kit:builder"
+CHECK_TOKENS = Path(__file__).resolve().parent / "check_tokens.py"
 OUTPUT_TAIL_LINES = 25
 MAX_LISTED_TESTS = 15
 MAX_CONSECUTIVE_BLOCKS = 3
@@ -205,6 +208,8 @@ def gate_steps(
     else:
         skipped_ids = [*waiting_behavior_ids(tasks, task_id), outcome_probe_id(spec_id)]
         steps = [GateStep("check", config.check)]
+    if config.design:
+        steps.append(GateStep("design tokens", f"python3 {shlex.quote(str(CHECK_TOKENS))}"))
     test_files = spec_test_files(config, spec_id)
     if test_files:
         command = fill(config.tests.run, files=test_files, grep=grep_excluding(skipped_ids))

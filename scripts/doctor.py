@@ -4,8 +4,9 @@
 Usage: doctor.py [--run-check]
   --run-check   also run the config's `check` command, which must pass before the first build
 
-Checks: Python version, git, the config, the folders kit writes to, the commands the config
-names, and (with --run-check) a green `check` on the current tree.
+Checks: Python version, git, the config, the folders kit writes to, the design system's files
+when the config names them, the commands the config names, and (with --run-check) a green
+`check` on the current tree.
 """
 
 import shlex
@@ -15,7 +16,7 @@ import sys
 from pathlib import Path
 from typing import NamedTuple
 
-from kit_config import CONFIG_PATH, Config, ConfigError, load, project_root
+from kit_config import CONFIG_PATH, Config, ConfigError, load, project_root, relative
 
 MIN_PYTHON = (3, 11)
 
@@ -49,6 +50,7 @@ def main() -> int:
         results.append(passed(f"config: {CONFIG_PATH} loads"))
     if config is not None:
         results += check_folders(config)
+        results += check_design(config)
         results += check_commands(config)
         if arguments == ["--run-check"]:
             results.append(run_check(config))
@@ -81,6 +83,20 @@ def check_folders(config: Config) -> list[Result]:
         else failed(f"folder: {folder_name}/ missing; /kit:setup creates it")
         for path in (config.specs_dir, config.decisions_dir)
         if (folder_name := path.relative_to(config.root).as_posix())
+    ]
+
+
+def check_design(config: Config) -> list[Result]:
+    if config.design is None:
+        return []
+    return [
+        passed(f"design.{field_name}: {relative(path, config.root)}")
+        if path.is_file()
+        else failed(f"design.{field_name}: {relative(path, config.root)} missing; {fix}")
+        for field_name, path, fix in (
+            ("guide", config.design.guide, "the design-system build writes it"),
+            ("tokens", config.design.tokens, "point it at the CSS file that defines the tokens"),
+        )
     ]
 
 
