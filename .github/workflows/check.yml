@@ -1,0 +1,36 @@
+name: Check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: astral-sh/setup-uv@v6
+      - name: Lint and format
+        run: uv tool run ruff check scripts && uv tool run ruff format --check scripts
+      - name: Types
+        run: uv tool run pyright scripts
+      - name: Skills
+        run: |
+          python3 scripts/lint_skill.py skills/*/SKILL.md
+          python3 scripts/check_routes.py skills
+      - name: Agents
+        run: python3 scripts/lint_agent.py agents/*.md
+      - name: Manifests
+        run: |
+          python3 -m json.tool .claude-plugin/plugin.json > /dev/null
+          python3 -m json.tool .claude-plugin/marketplace.json > /dev/null
+          python3 -m json.tool hooks/hooks.json > /dev/null
+          for preset in skills/setup/assets/*.json; do python3 -m json.tool "$preset" > /dev/null; done
