@@ -14,6 +14,7 @@ The change is simple, idiomatic for this project and its framework versions, ful
 - Spec ID and round number (ask if missing)
 - `git diff <base>`, with base from tasks.json
 - The project's CLAUDE.md, `.claude/rules/`, `docs/decisions/`, and `.claude/kit/checklists/code.md` if present
+- The architecture guide `architecture.guide` names in the config, if set
 
 ## Out
 
@@ -42,6 +43,8 @@ flowchart TD
   - _Because:_ a silent contradiction leaves the record describing an architecture that no longer exists
 - **No source file is newer than the gate log (`kit-*-gate-<id>-task.log`, temp dir)** → don't rerun the checks; cite the log
   - _Because:_ the builder's last gate already ran them; a rerun costs minutes and repeats a green result
+- **Code sits outside the home the architecture guide gives it** → blocker; cite the guide's line and name the home
+  - _Because:_ the next feature copies from what's there, so a misplaced file multiplies
 - **Tempted to redesign** → note it; don't block on it
   - _Because:_ the spec is met; redesign is a new spec
 

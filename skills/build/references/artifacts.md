@@ -88,6 +88,8 @@ After the latest round passes and before the report, turn what the build settled
   - _Because:_ rules come from code that exists, so they match the architecture instead of predicting it
 - **A second feature reuses a UI piece the first one built** → move it to the shared components, with a section in the design guide and a gallery page
   - _Because:_ the third feature then finds it in the guide instead of building its own
+- **A second module needs code one module built** → move it to its shared home, with a line under What's shared in the architecture guide
+  - _Because:_ the third module then imports it instead of copying it
 - **A pattern appears once and nothing else must follow it** → no rule
   - _Because:_ every rule loads into later sessions; one-off rules are noise
 - **Records and rules written** → commit them together; list each under the report's Codified
