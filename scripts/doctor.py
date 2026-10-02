@@ -4,9 +4,9 @@
 Usage: doctor.py [--run-check]
   --run-check   also run the config's `check` command, which must pass before the first build
 
-Checks: Python version, git, the config, the folders kit writes to, the design system's files
-when the config names them, the commands the config names, and (with --run-check) a green
-`check` on the current tree.
+Checks: Python version, git, the config, the folders kit writes to, the design system's and the
+architecture's files when the config names them, the commands the config names, and (with
+--run-check) a green `check` on the current tree.
 """
 
 import shlex
@@ -51,6 +51,7 @@ def main() -> int:
     if config is not None:
         results += check_folders(config)
         results += check_design(config)
+        results += check_architecture(config)
         results += check_commands(config)
         if arguments == ["--run-check"]:
             results.append(run_check(config))
@@ -97,6 +98,21 @@ def check_design(config: Config) -> list[Result]:
             ("guide", config.design.guide, "the design-system build writes it"),
             ("tokens", config.design.tokens, "point it at the CSS file that defines the tokens"),
         )
+    ]
+
+
+def check_architecture(config: Config) -> list[Result]:
+    architecture = config.architecture
+    if architecture is None:
+        return []
+    files = [("guide", architecture.guide, "the architecture skill writes it")]
+    if architecture.baseline is not None:
+        files.append(("baseline", architecture.baseline, "run check_shape.py --write-baseline"))
+    return [
+        passed(f"architecture.{field_name}: {relative(path, config.root)}")
+        if path.is_file()
+        else failed(f"architecture.{field_name}: {relative(path, config.root)} missing; {fix}")
+        for field_name, path, fix in files
     ]
 
 

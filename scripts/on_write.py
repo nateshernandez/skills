@@ -13,6 +13,7 @@ Does nothing in a project without .claude/kit/config.json. Otherwise, by what wa
   .claude/CHANGELOG.md                          lint_changelog.py, check_branch_dates.py
   a file matching `format` or `lint`            the config's format, then lint, command
   a .css file, when the config has `design`     check_tokens.py
+  any file, when the config has `architecture`  check_shape.py
 Exit 2 sends the problems back to Claude; any other outcome stays silent.
 """
 
@@ -23,6 +24,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 import check_branch_dates
+import check_shape
 import check_tokens
 import lint_agent
 import lint_changelog
@@ -64,6 +66,7 @@ def main() -> int:
         format_and_lint(written_path, config)
         or check_kit_file(written_path, config)
         or check_css(written_path, config)
+        or check_code_shape(written_path, config)
     )
     if not report:
         return 0
@@ -108,6 +111,13 @@ def check_css(path: Path, config: Config) -> str | None:
         return None
     guide = relative(config.design.guide, config.root)
     return "\n".join([*problems, f"Fix these now; the tokens and their uses are in {guide}."])
+
+
+def check_code_shape(path: Path, config: Config) -> str | None:
+    if config.architecture is None or "node_modules" in path.parts:
+        return None
+    problems = check_shape.check_paths([path], config)
+    return "\n".join([*problems[:-1], f"Fix these now. {problems[-1]}"]) if problems else None
 
 
 def lint_build_output(path: Path, config: Config) -> list[str]:

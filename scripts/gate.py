@@ -6,7 +6,7 @@ Tests naming a behavior that another unfinished task covers (the current task's 
 are skipped, and so are the `<n>.outcome` probes, which judge the whole feature. The full gate,
 run once per spec after the last review round: `check_full`, then the spec's acceptance tests
 and probes for every delivered behavior. Both run check_tokens.py after the check when the
-config has `design`.
+config has `design`, and check_shape.py when it has `architecture`.
 
 Each step's output goes to `kit-gate-<spec>-<scope>.log` in the temp dir. A red run prints the
 failed step, that path, the failing test titles, and the log's last lines; read the log, don't
@@ -40,6 +40,7 @@ from kit_config import Config, ConfigError, fill, load, load_if_set_up, relative
 
 BUILDER_AGENT = "kit:builder"
 CHECK_TOKENS = Path(__file__).resolve().parent / "check_tokens.py"
+CHECK_SHAPE = Path(__file__).resolve().parent / "check_shape.py"
 OUTPUT_TAIL_LINES = 25
 MAX_LISTED_TESTS = 15
 MAX_CONSECUTIVE_BLOCKS = 3
@@ -210,6 +211,8 @@ def gate_steps(
         steps = [GateStep("check", config.check)]
     if config.design:
         steps.append(GateStep("design tokens", f"python3 {shlex.quote(str(CHECK_TOKENS))}"))
+    if config.architecture:
+        steps.append(GateStep("code shape", f"python3 {shlex.quote(str(CHECK_SHAPE))}"))
     test_files = spec_test_files(config, spec_id)
     if test_files:
         command = fill(config.tests.run, files=test_files, grep=grep_excluding(skipped_ids))

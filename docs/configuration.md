@@ -25,6 +25,14 @@ Every command runs from the project root through your shell. Unknown fields are 
 | `design.tokens` | with `design` | The one CSS file that defines colour tokens, such as `src/app/globals.css`; kit checks its contrast |
 | `design.gallery` | no | Route of the dev-only gallery that shows every token and component, such as `/design` |
 | `design.contrast` | no | Token pairs to check beyond the ones kit finds by name, like `"link on background"` |
+| `architecture.guide` | with `architecture` | The architecture guide agents place code by and reviewers judge it against, such as `docs/architecture.md` |
+| `architecture.modules` | with `architecture` | The folder holding one folder per business module, such as `src/modules` |
+| `architecture.module_files` | with `architecture` | The only files a module's root may hold, such as `["index.ts", "server.ts", "actions.ts"]` |
+| `architecture.module_folders` | with `architecture` | Each folder a module may hold, mapped to the file name globs it allows, such as `{"domain": ["*.ts"]}` |
+| `architecture.sources` | with `architecture` | Globs for the source files the line cap applies to, such as `["src/**/*.ts", "src/**/*.tsx"]` |
+| `architecture.exempt` | no | Globs `check_shape.py` skips entirely, such as generated or vendored code |
+| `architecture.max_lines` | no | The most lines a source file may have; 250 when left out. Test files are exempt |
+| `architecture.baseline` | no | Where `check_shape.py --write-baseline` records an existing app's files, such as `.claude/kit/architecture-baseline.json` |
 
 ## Design
 
@@ -51,6 +59,35 @@ The light theme is every `:root`, `html`, and `@theme` block. The dark theme is 
   "tokens": "src/app/globals.css",
   "gallery": "/design",
   "contrast": ["link on background", "muted-foreground on surface", "ring on background 3"]
+}
+```
+
+## Architecture
+
+`/kit:architecture` writes the `architecture` block once its spec is approved. With it set:
+
+- Planners name each new file's home from `architecture.guide`, builders place code by it, and the code reviewer judges against it
+- `check_shape.py` runs in every task gate and on every file an agent writes. It fails when a module's root holds a file outside `module_files`, when a module holds a folder outside `module_folders` or a subfolder in one, when a folder's file matches none of its globs, or when a source file passes `max_lines`
+
+A test file counts as the file it tests, so `ticket-list.test.tsx` is checked as `ticket-list.tsx`. Globs are repo-relative: `**/` spans folders and `*` stays within one; `module_folders` globs match file names only.
+
+An app with code from before the architecture sets `baseline` and runs `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check_shape.py --write-baseline`. Files it lists may keep their place, and their length as long as they don't grow; new files meet the shape. Rerun it after moving code, so the list only shrinks.
+
+```json
+"architecture": {
+  "guide": "docs/architecture.md",
+  "modules": "src/modules",
+  "module_files": ["index.ts", "server.ts", "actions.ts"],
+  "module_folders": {
+    "use-cases": ["*.ts"],
+    "domain": ["*.ts"],
+    "infra": ["*.ts"],
+    "components": ["*.tsx", "use-*.ts", "*-state.ts"]
+  },
+  "sources": ["src/**/*.ts", "src/**/*.tsx"],
+  "exempt": ["src/components/ui/**"],
+  "max_lines": 250,
+  "baseline": ".claude/kit/architecture-baseline.json"
 }
 ```
 
