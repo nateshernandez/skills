@@ -67,11 +67,23 @@ You touch two files: the spec, before anything is built, and the report, at the 
 
 Each build works on its own branch and leaves a short, linear history: one commit for the spec, one for the tests, one per task, one per review round, and one for the records. Subjects are imperative one-liners, like `Dedupe repeated waitlist joins`. Branches land by rebasing, never by merge commits.
 
+## Design systems
+
+For an app with a UI, run `/kit:design-system` once before building features. It needs Mobbin's connector, or screenshots of apps you like.
+
+1. **Research.** It measures real screens from the apps you name and writes `docs/design/look.md`, citing each by its Mobbin link.
+2. **Two specs.** Design foundations (tokens, theme, gallery, drift lint) and core screens (list, detail, form, settings, notices, deletes, waiting, empty). You approve them like any spec.
+3. **A guide.** `docs/design/guide.md` is the contract: planners pick each screen's layout from it, builders follow it, and the UX reviewer cites it.
+4. **Checks.** `check_tokens.py` fails any token pair under WCAG AA in light or dark, and any colour outside the tokens file. The UX reviewer runs axe, tap target, clipped text, and lost focus checks on every screen.
+
+The system grows as features need it: a screen the guide doesn't cover gets a decision in its own spec, and a piece a second feature reuses moves into the guide. Version 1 has a recipe for Next.js, Tailwind 4, and shadcn.
+
 ## Skills
 
 | Command | What it does |
 | --- | --- |
 | `/kit:setup` | Writes the config, checks the gate is green, and adds a CLAUDE.md section |
+| `/kit:design-system` | Researches a look on Mobbin and writes the specs and guide for your app's design system |
 | `/kit:build` | Runs a feature from request to report, or resumes one |
 | `/kit:write-spec` | Writes a spec on its own, for planning ahead |
 | `/kit:write-decision` | Records an architecture or policy choice in `docs/decisions/` |
@@ -90,6 +102,7 @@ The agents run the rest of the skills: `plan-spec`, `write-acceptance-tests`, `b
 .claude/rules/git-commits.md     commit, branch, and push conventions, unless you have your own
 specs/<NNN>-<slug>/              spec, plan, tasks, progress, reviews, screens, report
 docs/decisions/<NNNN>-<slug>.md  decision records, written after review
+docs/design/guide.md, look.md    the design system agents build UI from, if you run /kit:design-system
 tests/acceptance/, tests/probes/ acceptance tests and reviewers' probes (paths are configurable)
 tests/kit/ux-checks.ts           UX checks the UX reviewer runs on every screen, for Playwright apps
 ```
