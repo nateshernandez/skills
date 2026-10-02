@@ -21,6 +21,38 @@ Every command runs from the project root through your shell. Unknown fields are 
 | `audit` | no | Dependency audit the security reviewer runs, such as `pnpm audit --prod` |
 | `format.extensions`, `format.run` | no | Formatter run on each file an agent writes; `run` must contain `{file}` |
 | `lint.extensions`, `lint.run` | no | Linter run after formatting; its errors go back to the agent in the same turn |
+| `design.guide` | with `design` | The design guide agents build UI from and reviewers judge it against, such as `docs/design/guide.md` |
+| `design.tokens` | with `design` | The one CSS file that defines colour tokens, such as `src/app/globals.css`; kit checks its contrast |
+| `design.gallery` | no | Route of the dev-only gallery that shows every token and component, such as `/design` |
+| `design.contrast` | no | Token pairs to check beyond the ones kit finds by name, like `"link on background"` |
+
+## Design
+
+`/kit:design-system` writes the `design` block once its specs are approved. With it set:
+
+- Builders read `design.guide` before building UI, planners name each task's layout and patterns from it, and the UX reviewer judges screens against it
+- `check_tokens.py` runs in every task gate and whenever an agent writes a CSS file: it fails when a token pair is below its contrast minimum in light or dark, or when a CSS file other than `design.tokens` holds a raw colour
+
+Pairs kit finds by name, in both themes:
+
+| Tokens | Pair |
+| --- | --- |
+| `--foreground`, `--background` | foreground on background |
+| `--<name>-foreground`, `--<name>` | `<name>-foreground` on `<name>`, like `muted-foreground on muted` |
+| `--<name>`, `--<name>-bg` | `<name>` on `<name>-bg`, like `danger on danger-bg` |
+
+Add any other pair to `design.contrast` as `"<token> on <token>"`, without the `--`. The minimum is 4.5:1, the WCAG AA bar for text; follow the pair with a number for another, like `"ring on background 3"` for a focus ring or a control's border.
+
+The light theme is every `:root`, `html`, and `@theme` block. The dark theme is light plus every block whose selector or `@media` query names `dark`, such as `.dark`, `[data-theme="dark"]`, or `prefers-color-scheme: dark`. A colour in another token's `var()` is followed; one kit can't read, like `color-mix()`, is listed as skipped.
+
+```json
+"design": {
+  "guide": "docs/design/guide.md",
+  "tokens": "src/app/globals.css",
+  "gallery": "/design",
+  "contrast": ["link on background", "muted-foreground on surface", "ring on background 3"]
+}
+```
 
 ## Placeholders
 

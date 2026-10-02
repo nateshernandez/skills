@@ -12,6 +12,7 @@ Does nothing in a project without .claude/kit/config.json. Otherwise, by what wa
   .claude/agents/*.md                           lint_agent.py
   .claude/CHANGELOG.md                          lint_changelog.py, check_branch_dates.py
   a file matching `format` or `lint`            the config's format, then lint, command
+  a .css file, when the config has `design`     check_tokens.py
 Exit 2 sends the problems back to Claude; any other outcome stays silent.
 """
 
@@ -22,6 +23,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 import check_branch_dates
+import check_tokens
 import lint_agent
 import lint_changelog
 import lint_decision
@@ -58,7 +60,11 @@ def main() -> int:
     written_path = Path(hook_input.get("tool_input", {}).get("file_path", "")).resolve()
     if config is None or not written_path.is_file() or not written_path.is_relative_to(config.root):
         return 0
-    report = format_and_lint(written_path, config) or check_kit_file(written_path, config)
+    report = (
+        format_and_lint(written_path, config)
+        or check_kit_file(written_path, config)
+        or check_css(written_path, config)
+    )
     if not report:
         return 0
     print(report, file=sys.stderr)
@@ -90,6 +96,18 @@ def kit_file_kinds(path: Path, config: Config) -> dict[str, bool]:
         "agent": is_markdown and path.parent == claude_dir / "agents",
         "changelog": path == claude_dir / "CHANGELOG.md",
     }
+
+
+def check_css(path: Path, config: Config) -> str | None:
+    if config.design is None or path.suffix != ".css" or "node_modules" in path.parts:
+        return None
+    problems = [
+        line for line in check_tokens.check_file(path, config) if not line.startswith("skip")
+    ]
+    if not problems:
+        return None
+    guide = relative(config.design.guide, config.root)
+    return "\n".join([*problems, f"Fix these now; the tokens and their uses are in {guide}."])
 
 
 def lint_build_output(path: Path, config: Config) -> list[str]:
