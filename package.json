@@ -1,0 +1,14 @@
+{
+  "name": "kit-assets",
+  "private": true,
+  "description": "Checks for the TypeScript files kit copies into projects; kit's own scripts are Python.",
+  "scripts": {
+    "check": "biome ci && tsc",
+    "format": "biome check --write"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "@playwright/test": "1.63.0",
+    "typescript": "7.0.2"
+  }
+}
