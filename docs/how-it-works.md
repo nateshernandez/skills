@@ -21,9 +21,10 @@ The builder never marks its own task done. `mark_task.py` runs the **task gate**
 
 1. Your `check` command
 2. `check_tokens.py`, when the config has `design`: token contrast in light and dark, and no colour outside the tokens file
-3. The spec's acceptance tests and probes, minus behaviors that later tasks will build, and minus the whole-feature `outcome` probes
+3. `check_shape.py`, when the config has `architecture`: each module's files in their places, and no source file past the line cap
+4. The spec's acceptance tests and probes, minus behaviors that later tasks will build, and minus the whole-feature `outcome` probes
 
-The **full gate** runs once per spec, after the last review round: `check_full`, `check_tokens.py`, then every delivered behavior's tests and the outcome probes.
+The **full gate** runs once per spec, after the last review round: `check_full`, `check_tokens.py`, `check_shape.py`, then every delivered behavior's tests and the outcome probes.
 
 Both gates log to a temp file and print only the failing test titles and the log's tail. A green run stamps the working tree, so rerunning on an unchanged tree returns at once. When a builder tries to stop with a red gate, the stop hook sends it back, at most three times in a row.
 
@@ -56,8 +57,9 @@ After the last round passes, the orchestrator codifies what the build settled:
 - **Decision records** in `docs/decisions/` for each choice in the plan marked `record`, written against the reviewed code, with `code:` paths a reader opens first
 - **Rules** in `.claude/rules/` for patterns later code must repeat, scoped by `paths:` so they load only where they apply
 - **Design guide sections** in `docs/design/guide.md` for a UI piece a second feature reused, moved into the shared components
+- **Architecture guide lines** in `docs/architecture.md` for code a second module needed, moved down to its shared home
 
-Both are listed under Codified in the report, for you to confirm before merging.
+Each is listed under Codified in the report, for you to confirm before merging.
 
 ## Commits
 
@@ -75,7 +77,7 @@ A build commits the spec, the acceptance tests, each task, each review round's f
 | Hook | Script | What it does |
 | --- | --- | --- |
 | Before a write | `fence.py` | Blocks a subagent's write outside its fence |
-| After a write | `on_write.py` | Formats and lints source files; lints specs, findings, reports, probes, decisions, skills, rules, agents, and the `.claude/` changelog; checks CSS files' colours when the config has `design` |
+| After a write | `on_write.py` | Formats and lints source files; lints specs, findings, reports, probes, decisions, skills, rules, agents, and the `.claude/` changelog; checks CSS files' colours when the config has `design`, and each file's place and length when it has `architecture` |
 | When a subagent stops | `gate.py --hook` | Sends kit's builder back to work while the task gate is red |
 
 All three exit at once in a project without `.claude/kit/config.json`.

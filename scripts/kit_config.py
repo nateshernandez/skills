@@ -18,9 +18,19 @@ DECISIONS_PATH = Path("docs") / "decisions"
 RUNNERS = ("playwright", "vitest", "jest")
 LENSES = ("quality", "ux", "security", "code")
 TOP_LEVEL_FIELDS = frozenset(
-    ("check", "check_full", "tests", "app", "screenshots", "audit", "format", "lint", "design")
+    (
+        *("check", "check_full", "tests", "app", "screenshots", "audit", "format", "lint"),
+        *("design", "architecture"),
+    )
 )
 DESIGN_FIELDS = frozenset(("guide", "tokens", "gallery", "contrast"))
+ARCHITECTURE_FIELDS = frozenset(
+    (
+        *("guide", "modules", "module_files", "module_folders"),
+        *("sources", "exempt", "max_lines", "baseline"),
+    )
+)
+DEFAULT_MAX_LINES = 250
 TEXT_CONTRAST = 4.5
 CONTRAST_PAIR_RE = re.compile(r"^([\w-]+) on ([\w-]+)(?: (\d+(?:\.\d+)?))?$")
 
@@ -60,6 +70,17 @@ class Design(NamedTuple):
     contrast: tuple[ContrastPair, ...]
 
 
+class Architecture(NamedTuple):
+    guide: Path
+    modules: Path
+    module_files: tuple[str, ...]
+    module_folders: dict[str, tuple[str, ...]]
+    sources: tuple[str, ...]
+    exempt: tuple[str, ...]
+    max_lines: int
+    baseline: Path | None
+
+
 class Config(NamedTuple):
     root: Path
     check: str
@@ -71,6 +92,7 @@ class Config(NamedTuple):
     format: OnWrite | None
     lint: OnWrite | None
     design: Design | None
+    architecture: Architecture | None
 
     @property
     def specs_dir(self) -> Path:
@@ -141,6 +163,9 @@ def parse(raw: dict, root: Path) -> Config:
         format=parse_on_write(raw["format"], "format") if "format" in raw else None,
         lint=parse_on_write(raw["lint"], "lint") if "lint" in raw else None,
         design=parse_design(raw["design"], root) if "design" in raw else None,
+        architecture=(
+            parse_architecture(raw["architecture"], root) if "architecture" in raw else None
+        ),
     )
 
 
@@ -242,6 +267,62 @@ def parse_contrast(raw_pairs: object) -> tuple[ContrastPair, ...]:
         foreground, background, minimum = match.groups()
         pairs.append(ContrastPair(foreground, background, float(minimum or TEXT_CONTRAST)))
     return tuple(pairs)
+
+
+def parse_architecture(raw_architecture: object, root: Path) -> Architecture:
+    if not isinstance(raw_architecture, dict):
+        message = f"{CONFIG_PATH}: `architecture` must be an object; see docs/configuration.md"
+        raise ConfigError(message)
+    unknown_fields = sorted(set(raw_architecture) - ARCHITECTURE_FIELDS)
+    if unknown_fields:
+        message = (
+            f"{CONFIG_PATH}: unknown architecture fields {unknown_fields};"
+            " see docs/configuration.md"
+        )
+        raise ConfigError(message)
+    max_lines = raw_architecture.get("max_lines", DEFAULT_MAX_LINES)
+    if not isinstance(max_lines, int) or isinstance(max_lines, bool) or max_lines < 1:
+        message = f"{CONFIG_PATH}: architecture.max_lines must be a whole number above 0"
+        raise ConfigError(message)
+    baseline = raw_architecture.get("baseline")
+    return Architecture(
+        guide=root / required_text(raw_architecture, "guide", "architecture.", "a path"),
+        modules=root / required_text(raw_architecture, "modules", "architecture.", "a path"),
+        module_files=text_list(raw_architecture, "module_files"),
+        module_folders=parse_module_folders(raw_architecture.get("module_folders")),
+        sources=text_list(raw_architecture, "sources"),
+        exempt=text_list(raw_architecture, "exempt", is_required=False),
+        max_lines=max_lines,
+        baseline=root / required_text(raw_architecture, "baseline", "architecture.", "a path")
+        if baseline is not None
+        else None,
+    )
+
+
+def parse_module_folders(raw_folders: object) -> dict[str, tuple[str, ...]]:
+    is_folder_map = isinstance(raw_folders, dict) and all(
+        isinstance(globs, list) and globs and all(isinstance(glob, str) for glob in globs)
+        for globs in raw_folders.values()
+    )
+    if not is_folder_map:
+        message = (
+            f"{CONFIG_PATH}: architecture.module_folders must map each folder to its file globs,"
+            ' like {"domain": ["*.ts"]}'
+        )
+        raise ConfigError(message)
+    assert isinstance(raw_folders, dict)
+    return {folder: tuple(globs) for folder, globs in raw_folders.items()}
+
+
+def text_list(raw: dict, field_name: str, *, is_required: bool = True) -> tuple[str, ...]:
+    values = raw.get(field_name, None if is_required else [])
+    is_text_list = isinstance(values, list) and all(isinstance(value, str) for value in values)
+    if not is_text_list or (is_required and not values):
+        count = "a list of one or more" if is_required else "a list of"
+        message = f"{CONFIG_PATH}: architecture.{field_name} must be {count} strings"
+        raise ConfigError(message)
+    assert isinstance(values, list)
+    return tuple(values)
 
 
 def required_text(
