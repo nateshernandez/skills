@@ -1,0 +1,19 @@
+{
+  "check": "npm run lint && npm run typecheck && npm test",
+  "check_full": "npm run lint && npm run typecheck && npm test && npm run build",
+  "tests": {
+    "runner": "jest",
+    "acceptance": "tests/acceptance/{spec}.test.ts",
+    "probes": "tests/probes/{spec}-{lens}.test.ts",
+    "run": "npx jest {files} -t {grep}"
+  },
+  "audit": "npm audit --omit=dev",
+  "format": {
+    "extensions": [".ts", ".tsx", ".js", ".mjs"],
+    "run": "node_modules/.bin/prettier --write --log-level silent {file}"
+  },
+  "lint": {
+    "extensions": [".ts", ".tsx", ".js", ".mjs"],
+    "run": "node_modules/.bin/eslint --no-warn-ignored {file}"
+  }
+}

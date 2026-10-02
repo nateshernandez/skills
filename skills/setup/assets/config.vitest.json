@@ -1,0 +1,19 @@
+{
+  "check": "pnpm lint && pnpm typecheck && pnpm test",
+  "check_full": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+  "tests": {
+    "runner": "vitest",
+    "acceptance": "tests/acceptance/{spec}.test.ts",
+    "probes": "tests/probes/{spec}-{lens}.test.ts",
+    "run": "pnpm exec vitest run {files} -t {grep}"
+  },
+  "audit": "pnpm audit --prod",
+  "format": {
+    "extensions": [".ts", ".tsx", ".js", ".mjs"],
+    "run": "node_modules/.bin/prettier --write --log-level silent {file}"
+  },
+  "lint": {
+    "extensions": [".ts", ".tsx", ".js", ".mjs"],
+    "run": "node_modules/.bin/eslint --no-warn-ignored {file}"
+  }
+}

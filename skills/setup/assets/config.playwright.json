@@ -1,0 +1,25 @@
+{
+  "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+  "check_full": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm exec playwright test",
+  "tests": {
+    "runner": "playwright",
+    "acceptance": "tests/acceptance/{spec}.spec.ts",
+    "probes": "tests/probes/{spec}-{lens}.spec.ts",
+    "run": "pnpm exec playwright test {files} --grep {grep}"
+  },
+  "app": {
+    "serve": "pnpm build && pnpm start --port 3100",
+    "url": "http://localhost:3100",
+    "env": { "REUSE_SERVER": "1" }
+  },
+  "screenshots": "pnpm exec playwright screenshot",
+  "audit": "pnpm audit --prod",
+  "format": {
+    "extensions": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".css"],
+    "run": "node_modules/.bin/prettier --write --log-level silent {file}"
+  },
+  "lint": {
+    "extensions": [".ts", ".tsx", ".js", ".jsx", ".mjs"],
+    "run": "node_modules/.bin/eslint --no-warn-ignored {file}"
+  }
+}
