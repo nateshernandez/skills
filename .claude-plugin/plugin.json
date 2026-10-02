@@ -1,6 +1,6 @@
 {
   "name": "kit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Spec-driven feature builds for Claude Code: approve a short spec, and an agent team plans, tests, builds, reviews, and reports back.",
   "author": {
     "name": "Nate Hernandez",
