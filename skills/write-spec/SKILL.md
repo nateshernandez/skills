@@ -48,6 +48,8 @@ flowchart TD
   - _Because:_ what doesn't fit one screen doesn't get reviewed
 - **The feature has UI** → behaviors cover each screen's empty, loading, error, and phone states and its longest real content, or Not doing lists them
   - _Because:_ the states nobody specified are the ones reviewers find missing
+- **A screen the design guide has no layout or pattern for** → find 3–5 apps doing it on Mobbin; add a D item choosing its shape
+  - _Because:_ a new screen type is then decided once, from evidence, instead of invented in a task
 - **Prototyping UI** → static HTML in the spec folder, with the design guide's tokens and worst-case content, then `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/screens.py specs/<id>/screens specs/<id>/prototype.html`
   - _Because:_ a screenshot gets design feedback that a description never does
 - **Requester replies by ID** → apply each reply, keep IDs stable, re-lint, show the diff
@@ -73,6 +75,7 @@ flowchart TD
 
 - [references/format.md](references/format.md): sections, item shape, lenses, limits
 - [references/example.md](references/example.md): a complete spec, for reference
+- [../design-system/references/research.md](../design-system/references/research.md): searching Mobbin and citing what it finds
 - [assets/spec-template.md](assets/spec-template.md): blank spec, copied for each new spec
 - [../../scripts/new_spec.py](../../scripts/new_spec.py): creates the next numbered spec folder
 - [../../scripts/lint_spec.py](../../scripts/lint_spec.py): format and ID-permanence lint; also runs on every write

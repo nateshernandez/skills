@@ -44,6 +44,8 @@ flowchart TD
   - _Because:_ the codify step records exactly what Decisions names; reviewers check the rest against it
 - **The spec has UI** → in Approach, name each screen's layout and patterns from the design guide (`design.guide` in the config)
   - _Because:_ builders start from the guide's shared pieces instead of inventing their own
+- **A task builds a layout or pattern the guide lacks** → the same task adds its guide section and gallery page
+  - _Because:_ the next feature finds it in the guide instead of inventing it again
 - **Choosing a library** → prefer what's installed; a new dependency is a Flag
   - _Because:_ every dependency adds security and upkeep cost
 - **Unsure how a framework API works in this version** → read its installed docs before planning around it
