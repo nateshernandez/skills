@@ -13,6 +13,7 @@ The feature looks native to this app, and a first-time visitor finishes it on ph
 
 - Spec ID and round number (ask if missing)
 - `specs/<id>/spec.md`, including its Looks like screens
+- The design guide `design.guide` names in `.claude/kit/config.json`, and its gallery route, if set
 - `.claude/kit/checklists/ux.md` if present: the project's design system and blocker bar
 - Scripts named here run as `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/<name>.py`
 
@@ -28,8 +29,8 @@ The feature looks native to this app, and a first-time visitor finishes it on ph
 flowchart TD
   B["screens.py specs/id/screens/rN and each route the feature touches"]
   B --> C["Look at every screenshot"]
-  C --> D["Compare with Looks like and references/checklist.md"]
-  D --> E["Probe states and keyboard path; run_tests.py"]
+  C --> D["Compare with the design guide, Looks like, and references/checklist.md"]
+  D --> E["Probe with tests/kit/ux-checks.ts, worst-case data, and the keyboard path; run_tests.py"]
   E --> F["Write findings; lint_outputs.py passes"]
 ```
 
@@ -43,6 +44,8 @@ flowchart TD
   - _Because:_ the builder acts on it with no other context
 - **Spec's Looks like differs from the build** → blocker only if a behavior or the outcome suffers
   - _Because:_ prototypes are sketches, not pixel contracts
+- **The design guide has a rule for what's on screen** → judge against it and cite its line; it outranks the prototype
+  - _Because:_ the guide is what every screen shares; a prototype is one feature's sketch
 
 ## Done When
 
