@@ -2,6 +2,16 @@
 
 What each release of kit changes for the people using it. Newest first.
 
+## 0.3.0 (2026-10-02)
+
+- **Added** `/kit:architecture`: writes an architecture spec and `docs/architecture.md` that give every file one home by layer and module, plus the recipe's rules; a recipe for Next.js, and a baseline so an app with existing code can adopt it
+- **Added** `check_shape.py`: fails a file outside its module's allowed places, or a source file past the line cap; runs in every gate and on each write when the config has `architecture`
+- **Added** an `architecture` config block naming the guide, the modules folder, each module's allowed files and folders, the sources, exemptions, line cap, and baseline
+- **Added** turbo builds: `/kit:build --turbo` runs one builder and one review round with the verifier, plus the security reviewer when triggered; the report lists what it skipped, and `--standard` runs those reviews later
+- **Added** a `build` config block: `mode` makes turbo the default, and `turbo_model` runs turbo's test author, builders, and verifier on a faster model
+- **Changed** planners name each new file's home from the architecture guide, builders place code by it, and the code review blocks a file outside the home the guide gives it
+- **Changed** `/kit:setup` suggests `/kit:architecture` once the gate is green
+
 ## 0.2.0 (2026-10-02)
 
 - **Added** `/kit:design-system`: researches a look on Mobbin, then writes `docs/design/look.md`, a design foundations spec, a core screens spec, and the design guide agents build UI from; a recipe for Next.js, Tailwind 4, and shadcn
