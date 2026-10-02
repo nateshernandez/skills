@@ -21,6 +21,7 @@ A green gate, kit's folders, and a CLAUDE.md section, so `/kit:build` works on t
 - `specs/` and `docs/decisions/`, each with a `.gitkeep`
 - The section in assets/claude-md-section.md, added to CLAUDE.md
 - `.claude/rules/git-commits.md` from assets/, unless the project already sets commit conventions
+- `tests/kit/ux-checks.ts` from assets/, when the project has a UI tested with Playwright
 - One commit with all of it
 
 ## Flow
@@ -33,7 +34,7 @@ flowchart TD
   D --> E["Write config, folders, CLAUDE.md section"]
   E --> F{"doctor.py --run-check green?"}
   F -- no --> G["Report the red check; stop"]
-  F -- yes --> H["Commit; offer the team setting; suggest /kit:build"]
+  F -- yes --> H["Commit; offer the team setting; suggest /kit:design-system for a UI with no design, else /kit:build"]
 ```
 
 ## Rules
@@ -48,6 +49,8 @@ flowchart TD
   - _Because:_ a gate that calls a missing script is red forever
 - **The project has no UI** → leave out `app` and `screenshots`
   - _Because:_ the UX lens and prototypes only run when `screenshots` is set
+- **The project has a UI tested with Playwright** → copy the UX checks; add `@axe-core/playwright` to devDependencies only with a yes
+  - _Because:_ UX probes import them, so every build checks screens against the same bar
 - **Playwright starts its own server** → suggest `webServer.port` read `KIT_PORT`, and reuse a running server when `REUSE_SERVER` is set; edit only with a yes
   - _Because:_ the gate and reviewers run servers side by side; fixed ports collide
 - **`check` is red on the current tree** → stop and report; don't commit the setup
@@ -59,7 +62,7 @@ flowchart TD
 
 - [ ] `doctor.py --run-check` prints no FAIL lines
 - [ ] CLAUDE.md has the kit section once
-- [ ] The setup commit holds only the config, the folders, CLAUDE.md, and the commit rule
+- [ ] The setup commit holds only the config, the folders, CLAUDE.md, the commit rule, and the UX checks
 
 ## Never
 
@@ -74,4 +77,5 @@ flowchart TD
 - [assets/config.jest.json](assets/config.jest.json): the same, with Jest
 - [assets/claude-md-section.md](assets/claude-md-section.md): the section added to the project's instructions
 - [assets/git-commits.md](assets/git-commits.md): commit, branch, and push rule for every session
+- [assets/ux-checks.ts](assets/ux-checks.ts): side scroll, tap targets, clipped text, lost focus, and axe, for UX probes
 - [../../scripts/doctor.py](../../scripts/doctor.py): readiness checks, one line each

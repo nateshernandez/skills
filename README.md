@@ -91,6 +91,7 @@ The agents run the rest of the skills: `plan-spec`, `write-acceptance-tests`, `b
 specs/<NNN>-<slug>/              spec, plan, tasks, progress, reviews, screens, report
 docs/decisions/<NNNN>-<slug>.md  decision records, written after review
 tests/acceptance/, tests/probes/ acceptance tests and reviewers' probes (paths are configurable)
+tests/kit/ux-checks.ts           UX checks the UX reviewer runs on every screen, for Playwright apps
 ```
 
 kit's hooks do nothing in a project without `.claude/kit/config.json`, so it's safe to install at user scope.

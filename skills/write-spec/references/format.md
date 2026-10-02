@@ -44,8 +44,8 @@ A spec is the contract between the requester and the build team. The requester a
 ## Lenses
 
 - **Product** → the outcome line, Not doing, and whether each behavior earns its place
-- **Design** → Looks like; states the user sees (empty, loading, error, success)
-- **UX** → error recovery, keyboard use, small screens, copy the user reads
+- **Design** → Looks like; each screen's states (empty, loading, error, success) and its longest real content
+- **UX** → error recovery, keyboard use and where focus goes after each action, phone width, copy the user reads
 - **Tech** → decisions the stack forces (storage, server vs client)
 - **Quality** → every outcome is observable, so a test can check it
 - **Security** → input, auth, abuse, data exposure; each risk becomes a behavior

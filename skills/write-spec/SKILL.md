@@ -46,7 +46,9 @@ flowchart TD
   - _Because:_ lens notes as prose get skimmed; behaviors get tested
 - **Spec passes 12 behaviors or 50 lines** → split into two specs
   - _Because:_ what doesn't fit one screen doesn't get reviewed
-- **Prototyping UI** → static HTML in the spec folder, then `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/screens.py specs/<id>/screens specs/<id>/prototype.html`
+- **The feature has UI** → behaviors cover each screen's empty, loading, error, and phone states and its longest real content, or Not doing lists them
+  - _Because:_ the states nobody specified are the ones reviewers find missing
+- **Prototyping UI** → static HTML in the spec folder, with the design guide's tokens and worst-case content, then `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/screens.py specs/<id>/screens specs/<id>/prototype.html`
   - _Because:_ a screenshot gets design feedback that a description never does
 - **Requester replies by ID** → apply each reply, keep IDs stable, re-lint, show the diff
   - _Because:_ tests and findings point at IDs; renumbering breaks the chain
