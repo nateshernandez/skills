@@ -1,0 +1,17 @@
+{
+  "name": "nateshernandez",
+  "owner": {
+    "name": "Nate Hernandez",
+    "url": "https://github.com/nateshernandez"
+  },
+  "description": "Nate Hernandez's Claude Code plugins.",
+  "plugins": [
+    {
+      "name": "kit",
+      "source": "./",
+      "description": "Spec-driven feature builds: approve a short spec, and an agent team plans, tests, builds, reviews, and reports back.",
+      "category": "engineering",
+      "keywords": ["spec-driven", "agents", "tdd", "code-review", "workflow"]
+    }
+  ]
+}
