@@ -11,8 +11,7 @@ The requested feature ships working, passes every lens, and comes back as a one-
 
 ## In
 
-- The request, or a spec ID to resume (ask if missing)
-- `spec_status.py` output for where a spec stands
+- The request, or a spec ID to resume (ask if missing); `--turbo` or `--standard` if given
 - Scripts named here run as `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/<name>.py`
 
 ## Out
@@ -40,6 +39,8 @@ flowchart TD
 
 - **Starting or resuming** → run `spec_status.py [number]` and continue from what the files say
   - _Because:_ the files are the team's memory; a new session knows nothing else
+- **Picking the mode** → resolve it per references/turbo.md; in turbo, its rules replace these where they differ
+  - _Because:_ turbo trades the planner, per-task builders, two lenses, and later rounds for speed
 - **Spec just approved** → on a branch named for the spec, set `status: building` and commit before delegating
   - _Because:_ the builder's stop gate only runs for specs marked building
 - **Size S** → skip the planner; write a one-task tasks.json and run `check_tasks.py` on it
@@ -77,6 +78,5 @@ flowchart TD
 
 - [references/artifacts.md](references/artifacts.md): every file in `specs/<id>/`, task list, findings, report, codify
 - [assets/report-template.md](assets/report-template.md): blank report to copy
-- [../../scripts/spec_status.py](../../scripts/spec_status.py): where each spec stands, in number order
-- [../../scripts/gate.py](../../scripts/gate.py): the task and full gates
-- [../../scripts/review_app.py](../../scripts/review_app.py): starts and stops the app reviewers share
+- [references/turbo.md](references/turbo.md): the faster mode: what it cuts, keeps, and reports
+- [../../scripts/spec_status.py](../../scripts/spec_status.py): where each spec stands and its mode

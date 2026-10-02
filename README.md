@@ -161,6 +161,7 @@ Or turn on auto-update for the `nateshernandez` marketplace under **Marketplaces
 
 - **Cost.** A medium feature runs a planner, a test author, one builder per task, and two to four reviewers per round. Use it for features, not one-line fixes.
 - **Small changes.** Size `S` specs skip the planner and run a single task.
+- **Turbo mode.** `/kit:build --turbo <request>` keeps the spec, your approval, the tests, the gates, and the verifier, but runs one builder and one review round, with no code or UX review. Set `build.mode` to make it the default; see [Build modes](docs/configuration.md#build-modes).
 - **Your stack's conventions.** kit reads your CLAUDE.md, `.claude/rules/`, and decision records. Put stack-specific review checks in `.claude/kit/checklists/<lens>.md`.
 - **Platforms.** macOS and Linux. On Windows, use WSL.
 

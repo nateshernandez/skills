@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 from check_ids import load_spec_ids, stale_references
-from kit_config import LENSES, Config, ConfigError, load, relative
+from kit_config import LENSES, Config, ConfigError, load, relative, spec_mode
 
 REPORT_SECTIONS = (
     "Behaviors",
@@ -22,6 +22,7 @@ REPORT_SECTIONS = (
     "Decided without you",
     "Codified",
     "Open notes",
+    "Skipped",
     "Try it",
     "Screens",
 )
@@ -99,7 +100,8 @@ def lint(output_path: Path, config: Config) -> list[str]:
     if output_path.name == "report.md":
         spec_dir = output_path.parent
         id_problems = stale_references(output_path, load_spec_ids(spec_dir), allow_retired=False)
-        return lint_report(fields, lines, spec_dir, config.root) + id_problems
+        is_turbo = (spec_mode(spec_dir) or config.build.mode) == "turbo"
+        return lint_report(fields, lines, spec_dir, config.root, is_turbo=is_turbo) + id_problems
     spec_dir = output_path.parent.parent
     id_problems = stale_references(output_path, load_spec_ids(spec_dir), allow_retired=True)
     cited_problems = lint_cited_probes(lines, config, spec_dir.name)
@@ -229,7 +231,7 @@ def lint_findings(finding_lines: list[str]) -> tuple[list[str], int]:
 
 
 def lint_report(
-    fields: dict[str, str], lines: list[str], spec_dir: Path, repo_root: Path
+    fields: dict[str, str], lines: list[str], spec_dir: Path, repo_root: Path, *, is_turbo: bool
 ) -> list[str]:
     problems = []
     if fields.get("id") != spec_dir.name:
@@ -249,6 +251,7 @@ def lint_report(
     problems += lint_decisions(sections.get("Decided without you", []))
     problems += lint_codified(sections.get("Codified", []), repo_root)
     problems += lint_open_notes(sections.get("Open notes", []))
+    problems += lint_skipped(sections, is_turbo=is_turbo)
     problems += lint_images(sections.get("Screens", []), spec_dir)
     return problems
 
@@ -354,6 +357,19 @@ def lint_open_notes(section_lines: list[str]) -> list[str]:
         f"Open notes: `{line[:50]}` should be `- **[note] <lens> · <ref>** → ...`"
         for line in section_lines
         if not NOTE_RE.match(line)
+    ]
+
+
+def lint_skipped(sections: Sections, *, is_turbo: bool) -> list[str]:
+    has_skipped = "Skipped" in sections
+    if not is_turbo:
+        return ["Skipped: only a turbo build skips steps; drop the section"] if has_skipped else []
+    if not sections.get("Skipped"):
+        return ["Skipped: a turbo build lists each step it skipped (build's references/turbo.md)"]
+    return [
+        f"Skipped: `{line[:50]}` should be `- **<step>** → <what it would have checked>`"
+        for line in sections["Skipped"]
+        if not DECISION_RE.match(line)
     ]
 
 

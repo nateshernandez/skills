@@ -3,8 +3,10 @@
 
 Usage:
   spec_status.py            one line per spec, in number order: id, status, tasks done
-  spec_status.py SPEC       detail for one spec (`001-track` or just `1`): next task,
-                            latest review verdicts, report
+  spec_status.py SPEC       detail for one spec (`001-track` or just `1`): build mode, next
+                            task, latest review verdicts, report
+
+A spec's mode is its `mode:` field, else `build.mode` in the config, else standard.
 """
 
 import json
@@ -13,7 +15,7 @@ import sys
 from pathlib import Path
 from typing import NamedTuple
 
-from kit_config import project_root
+from kit_config import DEFAULT_BUILD, ConfigError, load_if_set_up, project_root, spec_mode
 
 SPECS_DIR = project_root() / "specs"
 STATUS_RE = re.compile(r"^status:\s*(\S+)", re.MULTILINE)
@@ -68,7 +70,7 @@ def summary_line(spec_dir: Path) -> str:
 def detail(spec_dir: Path) -> str:
     tasks = load_tasks(spec_dir)
     next_task = next((task for task in tasks if not task.passes), None)
-    lines = [summary_line(spec_dir)]
+    lines = [summary_line(spec_dir), mode_line(spec_dir)]
     lines.append(
         f"next task: {next_task.task_id} {next_task.title}" if next_task else "next task: none"
     )
@@ -80,6 +82,18 @@ def detail(spec_dir: Path) -> str:
         lines.append("reviews: none yet")
     lines.append("report: written" if (spec_dir / "report.md").exists() else "report: not yet")
     return "\n".join(lines)
+
+
+def mode_line(spec_dir: Path) -> str:
+    try:
+        config = load_if_set_up()
+    except ConfigError as error:
+        return f"mode: unknown; {error}"
+    build = config.build if config else DEFAULT_BUILD
+    own_mode = spec_mode(spec_dir)
+    mode, source = (own_mode, "spec") if own_mode else (build.mode, "config")
+    model = f", turbo model {build.turbo_model}" if mode == "turbo" and build.turbo_model else ""
+    return f"mode: {mode} (from {source}{model})"
 
 
 def spec_status(spec_dir: Path) -> str:

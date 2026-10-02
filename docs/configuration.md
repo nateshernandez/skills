@@ -33,6 +33,8 @@ Every command runs from the project root through your shell. Unknown fields are 
 | `architecture.exempt` | no | Globs `check_shape.py` skips entirely, such as generated or vendored code |
 | `architecture.max_lines` | no | The most lines a source file may have; 250 when left out. Test files are exempt |
 | `architecture.baseline` | no | Where `check_shape.py --write-baseline` records an existing app's files, such as `.claude/kit/architecture-baseline.json` |
+| `build.mode` | no | `standard` (the default) or `turbo`; how `/kit:build` runs a spec that doesn't name its own mode |
+| `build.turbo_model` | no | Model for a turbo build's test author, builders, and verifier, such as `sonnet`; unset, they use the session's model |
 
 ## Design
 
@@ -90,6 +92,35 @@ An app with code from before the architecture sets `baseline` and runs `python3 
   "baseline": ".claude/kit/architecture-baseline.json"
 }
 ```
+
+## Build modes
+
+A standard build plans the spec, runs one builder per task, and reviews it through every lens that applies, for up to three rounds. A turbo build is faster: one builder builds the whole spec, and one review round checks it.
+
+| Step | Standard | Turbo |
+| --- | --- | --- |
+| Spec, prototype, and your approval | ✓ | ✓ |
+| Planner: plan, threat model, decisions to record | ✓ | ✗ one task covering every behavior |
+| Failing acceptance tests, written before code | ✓ | ✓ |
+| Builders | one per task | one for the spec |
+| Task gate and stop gate, including the design and shape checks | ✓ | ✓ |
+| Verifier | ✓ | ✓ |
+| Security reviewer, when input, storage, auth, or secrets change | ✓ | ✓ |
+| Code reviewer | ✓ | ✗ |
+| UX reviewer, when UI changes and `screenshots` is set | ✓ | ✗ |
+| Review rounds | up to 3 | 1; its fixes pass the gate but aren't reviewed again |
+| Full gate | ✓ | ✓ |
+| Decision records, rules, and guide updates | ✓ | ✗ |
+
+Pick the mode per build with `/kit:build --turbo <request>` or `--standard`, or set a default:
+
+```json
+"build": { "mode": "turbo", "turbo_model": "sonnet" }
+```
+
+The mode is written into the spec's frontmatter as `mode:`, so you see it when you approve and a resumed build keeps it. A turbo report lists what it skipped under Skipped. To run the skipped reviews before merging, resume with `/kit:build <id> --standard`; it reviews the build as round 2.
+
+`turbo_model` applies only to turbo builds, and never to the security reviewer. It takes whatever the Agent tool accepts: an alias such as `sonnet` or `haiku`, or a full model ID.
 
 ## Placeholders
 

@@ -50,6 +50,10 @@ Each reviewer writes `specs/<id>/reviews/<lens>-r<round>.md`. Every finding is a
 
 Probes that pass are kept, so every later gate also runs them as regression tests.
 
+## Turbo builds trade review for speed
+
+A turbo build skips the planner, runs one builder for the whole spec, and reviews once with the verifier, plus the security reviewer when input, storage, auth, or secrets change. Blockers become one fix task that must pass the gate, with no second round, and nothing is codified. The spec, its prototype, your approval, the acceptance tests, the gates, and the full gate are the same as in a standard build. The report's Skipped section names each step left out. [configuration.md](configuration.md#build-modes) compares the two modes step by step.
+
 ## Builds leave context behind
 
 After the last round passes, the orchestrator codifies what the build settled:
