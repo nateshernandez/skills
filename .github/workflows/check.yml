@@ -22,6 +22,12 @@ jobs:
         run: uv tool run ruff check scripts && uv tool run ruff format --check scripts
       - name: Types
         run: uv tool run pyright scripts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: TypeScript assets
+        run: npm ci && npm run check
       - name: Skills
         run: |
           python3 scripts/lint_skill.py skills/*/SKILL.md
