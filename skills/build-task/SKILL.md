@@ -37,8 +37,8 @@ flowchart TD
   - _Because:_ the orchestrator fixes plans; editing a check to pass it is cheating
 - **The same failure survives 3 attempts** → log `blocked:` with the error; stop
   - _Because:_ a fresh look beats a fourth guess in the same context
-- **Building UI** → use the project's components and design tokens before hand-rolling
-  - _Because:_ one design system keeps screens consistent
+- **Building UI** → follow the design guide `design.guide` names in the config: the screen's layout, its patterns, components, and tokens
+  - _Because:_ one design system keeps screens consistent, and the UX reviewer judges against the guide
 - **Tempted to write a decision record or rule** → note the pattern in progress.md; the orchestrator codifies after review
   - _Because:_ records and rules describe reviewed code, not one task's draft
 - **Moved or renamed a file a decision record cites** → update that record's `code:` line only
