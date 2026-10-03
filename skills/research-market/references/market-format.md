@@ -51,9 +51,10 @@ none
 - **Sources** → `- **M<n> <what the source shows>** → <link>`; one per page or rerunnable query; numbers only go up
   - A Reddit count's link is the `cite:` URL reddit_search.py prints
   - Paywalled or estimated figures say so in the bold part: "estimate", "paywalled"
-- **Competitors, Alternatives, Failed attempts, Demand, Complaints** → `- **<name>** → <what's true> (M1, M4)`; every item cites at least one source; `none` when the search found nothing
-- **Competitor items** → who it's for, its price, its traction signals, and its customers' top complaint
+- **Competitors, Alternatives, Failed attempts, Demand, Complaints** → `- **<name>** → <what's true> (M1, M4)`, ending with its sources in brackets
+  - `none` when the search found nothing, except Competitors: the leader or the nearest substitute is always one
+- **Competitor items** → who it's for, its price, its traction signals, and its customers' top complaint, or "no complaints found"
 - **Failed attempts items** → what it was, when it stopped, and the reason it gave or others gave
 - **Unknown** → plain bullets: what research couldn't settle, and how to find out; `none` allowed
-- **Quotes** → 25 words or fewer, in quotation marks, never with a username
+- **Quotes** → 25 words or fewer, in quotation marks, never with a username; the lint checks both
 - **Not allowed** → tables, code blocks, `###` subsections

@@ -1,6 +1,6 @@
 # Where to look
 
-Web search and fetch cover most of the market; Reddit goes through reddit_search.py (reddit.md). Open every page you cite.
+Web search and fetch cover most of the market; Reddit goes through reddit_search.py (reddit.md). Open every page you cite; a page that won't load is skipped, not retried.
 
 ## Competitors
 
@@ -14,6 +14,7 @@ Web search and fetch cover most of the market; Reddit goes through reddit_search
 - **The competitor's own pricing page** → plans, price per seat or use, what the free tier holds
 - **No public price** → "contact sales" is itself a signal: they sell to larger customers
 - **Date it** → put the date read in the source line; prices change
+- **Region** → the customer's country; a page for another region says so in the source line
 
 ## Traction
 
