@@ -48,8 +48,8 @@ flowchart TD
   - _Because:_ one loud thread is an anecdote; a count anyone can rerun is evidence
 - **Builder and vendor posts** → set them apart; never count them as demand
   - _Because:_ founders testing the same idea crowd the customer's subreddits
-- **reddit_search.py says `still busy`** → do the web research, then retry Reddit once
-  - _Because:_ Arctic Shift's budget refills in minutes; the web research doesn't need it
+- **reddit_search.py says `still busy`** → write market.md without that search; retry it once before returning
+  - _Because:_ Arctic Shift's budget refills within minutes; writing first loses nothing
 - **A search finds nothing** → say so under Unknown, with how to find out
   - _Because:_ an empty search is a finding; a guess filling it isn't
 - **Tempted to judge the idea** → describe the market and leave the verdict out

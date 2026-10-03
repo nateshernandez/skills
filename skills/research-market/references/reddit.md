@@ -17,6 +17,7 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/reddit_search.py thread https://www.reddit
   - Plan about ten calls: `subreddits` once, `posts` and `comments` for the strongest pain phrases, `thread` for the top two or three
   - Run them one at a time; the script waits as told for up to 3 minutes, then exits with `still busy`
   - Repeating a call within a day is free: answers are cached
+- **Comment search is slow** → one or two words and `--since=6m`; it fetches 25 comments unless given `--max`
 - **Freshness** → scores and comment counts settle about 36 hours after posting
 
 ## Find where the customer talks
@@ -40,10 +41,11 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/reddit_search.py thread https://www.reddit
 - **Founders asking** → low-engagement posts phrased as surveys ("how much of your month goes to…", "talk me out of building") are usually builders validating; set them apart even without a `[builder?]` mark
 - **Vendors answering** → comments that end in a product link or a disclosure are marketing; their complaints about rivals are still signal
 - **Read the top threads** → `thread` on the two or three most engaged posts; the comments hold the workarounds and the money
-- **Count, don't collect** → "22 posts in 12 months, 2 with 20+ comments, most by builders" with the `cite:` URL as the source
+- **Opening a Reddit source** → a post's excerpt covers what the post says; a claim about its replies needs `thread`
+- **Count, don't collect** → "22 posts in 12 months, 2 with 20+ comments, most by builders" with the `cite:` URL as the source; it reruns the first 100
 - **Quote sparingly** → 25 words or fewer, no usernames, linked to the thread or comment
 
 ## Limits
 
-- **Arctic Shift** → not affiliated with Reddit, no uptime promise; `still busy` or `unreachable` means do the web research, retry Reddit once at the end, then say so under Unknown
+- **Arctic Shift** → not affiliated with Reddit, no uptime promise; on `still busy` or `unreachable`, finish market.md, retry once, then say so under Unknown
 - **Keep nothing raw** → write counts, short quotes, and links into market.md; leave search output out of the repo
