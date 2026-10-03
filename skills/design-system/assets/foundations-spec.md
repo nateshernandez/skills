@@ -6,7 +6,7 @@ size: L
 
 # Design foundations
 
-Every screen draws from one theme in light and dark, agents see their UI in seconds, and checks catch drift.
+Every screen draws from one theme in <light and dark | light only | dark only>, agents see their UI in seconds, and checks catch drift.
 
 ## Decide
 
@@ -16,8 +16,8 @@ Every screen draws from one theme in light and dark, agents see their UI in seco
   - _Alt:_ <another face and its cost, such as a font download> (tech lens)
 - **<n>.D3 Density** → <body px> text, <control px> controls, <row px> rows, 4px spacing grid; controls 44px on touch screens
   - _Alt:_ <roomier or denser numbers, and what fits on screen> (product lens)
-- **<n>.D4 First visit theme** → follow the operating system; a choice of light, dark, or system
-  - _Alt:_ <light or dark> by default; striking, but ignores the visitor's setting (UX lens)
+- **<n>.D4 Themes** → <light and dark, following the operating system, with a choice of light, dark, or system | light only | dark only, with no theme choice>
+  - _Alt:_ <the other option, such as one theme: half the colours to tune and check, but ignores the visitor's setting> (UX lens)
 - **<n>.D5 Catching visual drift** → lint, contrast checks, axe, and screenshot review; no committed image baselines
   - _Alt:_ gallery screenshots diffed against baselines; catches more, needs re-accepting on every change (quality lens)
 
@@ -28,10 +28,10 @@ Every screen draws from one theme in light and dark, agents see their UI in seco
   - _Because:_ security lens; the gallery is a dev tool, not product surface
 - **<n>.B3 Developer opens Foundations** → named swatches for every colour token, type scale, spacing, radii, and elevation
 - **<n>.B4 Developer opens Components** → every component in each variant and state: default, disabled, invalid, loading
-- **<n>.B5 Foundations shows status colours** → success, warning, danger, info, each as text on its tint, in both themes
-- **<n>.B6 Visitor picks light, dark, or system** → it applies at once, survives reload, and never flashes the wrong theme
-- **<n>.B7 Accessibility check runs** → every app and gallery route passes axe in light and dark
-- **<n>.B8 Keyboard user tabs through Components** → every control shows a visible focus ring in both themes
+- **<n>.B5 Foundations shows status colours** → success, warning, danger, info, each as text on its tint, in each theme
+- **<n>.B6 Visitor picks light, dark, or system** → it applies at once, survives reload, and never flashes the wrong theme <leave B6 out for a one-theme app>
+- **<n>.B7 Accessibility check runs** → every app and gallery route passes axe in each theme
+- **<n>.B8 Keyboard user tabs through Components** → every control shows a visible focus ring in each theme
 - **<n>.B9 Gallery at phone width** → nothing scrolls sideways; every control is at least 44px tall on a touch screen
 - **<n>.B10 Code uses a raw colour, arbitrary size, or a native control the kit wraps** → lint fails, naming what to use
 - **<n>.B11 Anyone opens a route that doesn't exist** → a not-found page in the app's look, with a link home
@@ -48,4 +48,6 @@ Every screen draws from one theme in light and dark, agents see their UI in seco
 
 ![Specimen, light](screens/specimen-desktop-light.png)
 ![Specimen, dark](screens/specimen-desktop-dark.png)
-![Specimen at phone width](screens/specimen-mobile-light.png)
+![Specimen at phone width](screens/specimen-mobile-<light or dark>.png)
+
+<one desktop screen per theme the app ships>

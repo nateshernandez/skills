@@ -85,7 +85,7 @@ For an app with a UI, run `/kit:design-system` once before building features. It
 1. **Research.** It measures real screens from the apps you name and writes `docs/design/look.md`, citing each by its Mobbin link.
 2. **Two specs.** Design foundations (tokens, theme, gallery, drift lint) and core screens (list, detail, form, settings, notices, deletes, waiting, empty). You approve them like any spec.
 3. **A guide.** `docs/design/guide.md` is the contract: planners pick each screen's layout from it, builders follow it, and the UX reviewer cites it.
-4. **Checks.** `check_tokens.py` fails any token pair under WCAG AA in light or dark, and any colour outside the tokens file. The UX reviewer runs axe, tap target, clipped text, and lost focus checks on every screen.
+4. **Checks.** `check_tokens.py` fails any token pair under WCAG AA in each theme the app ships, and any colour outside the tokens file. The UX reviewer runs axe, tap target, clipped text, and lost focus checks on every screen.
 
 The system grows as features need it: a screen the guide doesn't cover gets a decision in its own spec, and a piece a second feature reuses moves into the guide. Version 1 has a recipe for Next.js, Tailwind 4, and shadcn.
 

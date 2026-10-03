@@ -24,7 +24,7 @@ const INTERACTIVE = [
   "[tabindex]:not([tabindex='-1'])",
 ].join(',');
 
-// Every check that needs no interaction: run it at 390px in light and in dark.
+// Every check that needs no interaction: run it at 390px in each theme the app ships.
 export async function uxProblems(page: Page): Promise<UxProblem[]> {
   return [
     ...(await sideScroll(page)),

@@ -11,7 +11,7 @@ Two approved specs and a design guide that, once built, let agents ship accessib
 
 ## In
 
-- What the app is for, who uses it, and 2–3 apps whose look the requester likes (ask if missing)
+- The app's purpose, users, themes (light, dark, or both), and 2–3 apps whose look the requester likes (ask if missing)
 - The codebase: stack, and any tokens or components it already has
 - Mobbin's connector (`search_screens`, `search_flows`); without it, screenshots or URLs from the requester
 - `.claude/kit/config.json` with `screenshots` set; scripts run as `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/<name>.py`
@@ -47,7 +47,7 @@ flowchart TD
   - _Because:_ renaming breaks every screen already built on them
 - **Choosing a value** → measure it from the reference screens and cite them; adjectives aren't evidence
   - _Because:_ "modern and clean" gives every app the same look; measured screens give this one its own
-- **The specimen's CSS** → `specimen.css`, with the tokens in `:root` and `.dark` exactly as the recipe defines them
+- **The specimen's CSS** → `specimen.css`, tokens in `:root` and `.dark` as the recipe defines them; `:root` alone for one theme
   - _Because:_ `check_tokens.py` then checks the real pairs, before any app code exists
 - **Adding to the core screens spec** → only what every app needs; a domain layout waits for the first feature that uses it
   - _Because:_ half of btnext's prebuilt pieces never reached a real screen
@@ -61,9 +61,9 @@ flowchart TD
 ## Done When
 
 - [ ] look.md cites every source screen by `mobbin_url` or the requester's link, and every token by its evidence
-- [ ] `check_tokens.py specs/<id>/specimen.css` passes in light and dark
-- [ ] `lint_spec.py` passes on both specs; their screens show phone and desktop, light and dark
-- [ ] Both specs approved; the guide has no `<…>` left; the config has `design`; one commit
+- [ ] `check_tokens.py specs/<id>/specimen.css` passes in each theme the app ships; `--theme=<it>` there and on `screens.py` for one
+- [ ] `lint_spec.py` passes on both specs; their screens show phone and desktop, in each theme the app ships
+- [ ] Both specs approved; the guide has no `<…>` left; config has `design` (and `themes` for one); one commit
 
 ## Never
 

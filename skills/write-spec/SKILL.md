@@ -79,4 +79,4 @@ flowchart TD
 - [assets/spec-template.md](assets/spec-template.md): blank spec, copied for each new spec
 - [../../scripts/new_spec.py](../../scripts/new_spec.py): creates the next numbered spec folder
 - [../../scripts/lint_spec.py](../../scripts/lint_spec.py): format and ID-permanence lint; also runs on every write
-- [../../scripts/screens.py](../../scripts/screens.py): phone and desktop, light and dark screenshots
+- [../../scripts/screens.py](../../scripts/screens.py): phone and desktop screenshots in each theme

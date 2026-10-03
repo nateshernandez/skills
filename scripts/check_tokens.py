@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""Check the colour tokens' contrast in light and dark, and that no other CSS file holds a colour.
+"""Check the colour tokens' contrast in each theme, and that no other CSS file holds a colour.
 
-Usage: check_tokens.py [CSS_FILE ...]
+Usage: check_tokens.py [--theme=light|dark] [CSS_FILE ...]
   No files: contrast in the config's `design.tokens`, then raw colours in every tracked .css
   file outside specs/. Given files: the tokens file and anything under specs/ (a prototype) get
   the contrast check; any other file gets the raw-colour check. Without `design` in the config,
   given files all get the contrast check, as a design system's first prototype needs.
 
 Pairs: foreground on background, <name>-foreground on <name>, <name> on <name>-bg, and each
-`design.contrast` entry. docs/configuration.md says how the light and dark themes are read.
+`design.contrast` entry, in each of `design.themes` (light and dark when unset); `--theme`
+checks only that one, as a single-theme app's first prototype needs. docs/configuration.md says
+how the light and dark themes are read.
 Prints one line per problem and per pair it couldn't read; exit 1 on a problem.
 """
 
@@ -20,7 +22,17 @@ from collections.abc import Iterable, Iterator
 from pathlib import Path
 from typing import NamedTuple
 
-from kit_config import TEXT_CONTRAST, Config, ConfigError, ContrastPair, load, relative
+from kit_config import (
+    TEXT_CONTRAST,
+    Config,
+    ConfigError,
+    ContrastPair,
+    ThemeName,
+    configured_themes,
+    load,
+    relative,
+    split_theme_flag,
+)
 
 MAX_VAR_DEPTH = 10
 # OKLCH chroma and OKLab a/b written as percentages are fractions of 0.4 (CSS Color 4).
@@ -58,22 +70,24 @@ class Colour(NamedTuple):
 
 
 class Theme(NamedTuple):
-    name: str
+    name: ThemeName
     tokens: dict[str, str]
 
 
 def main() -> int:
     try:
         config = load()
+        theme_flag, arguments = split_theme_flag(sys.argv[1:])
     except ConfigError as error:
         print(error, file=sys.stderr)
         return 1
-    paths = [Path(arg).resolve() for arg in sys.argv[1:]]
+    themes = configured_themes(config, theme_flag)
+    paths = [Path(arg).resolve() for arg in arguments]
     if not paths and config.design is None:
         print("no `design` in the config and no files given; nothing to check")
         return 0
     paths = paths or default_paths(config)
-    problems = [problem for path in paths for problem in check_file(path, config)]
+    problems = [problem for path in paths for problem in check_file(path, config, themes)]
     for problem in problems:
         print(problem)
     if not problems:
@@ -97,14 +111,14 @@ def default_paths(config: Config) -> list[Path]:
     return [config.design.tokens, *others]
 
 
-def check_file(path: Path, config: Config) -> list[str]:
+def check_file(path: Path, config: Config, themes: tuple[ThemeName, ...]) -> list[str]:
     """Problems in one CSS file, each a line naming the file; `skip` lines aren't failures."""
     declarations = parse_declarations(path.read_text())
     shown_path = relative(path, config.root)
     design = config.design
     if design is None or path == design.tokens or is_spec_file(path, config):
         configured = design.contrast if design else ()
-        problems = contrast_problems(declarations, configured)
+        problems = contrast_problems(declarations, configured, themes)
         return [f"{shown_path}: {problem}" for problem in problems]
     tokens_path = relative(design.tokens, config.root)
     return [
@@ -149,7 +163,9 @@ def make_declaration(chain: tuple[str, ...], piece: str, text: str, start: int) 
 
 
 def contrast_problems(
-    declarations: list[Declaration], configured: tuple[ContrastPair, ...]
+    declarations: list[Declaration],
+    configured: tuple[ContrastPair, ...],
+    theme_names: tuple[ThemeName, ...],
 ) -> list[str]:
     themes = read_themes(declarations)
     defined = themes[0].tokens
@@ -160,7 +176,8 @@ def contrast_problems(
     checkable = [pair for pair in configured if is_defined(pair, defined)]
     pairs = dict.fromkeys([*named_pairs(defined), *checkable])
     for theme in themes:
-        problems += theme_problems(pairs, theme)
+        if theme.name in theme_names:
+            problems += theme_problems(pairs, theme)
     return problems
 
 

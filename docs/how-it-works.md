@@ -20,7 +20,7 @@ Limits keep specs reviewable: 50 lines, 5 decisions, 12 behaviors. A bigger feat
 The builder never marks its own task done. `mark_task.py` runs the **task gate** and flips `passes` only when it's green:
 
 1. Your `check` command
-2. `check_tokens.py`, when the config has `design`: token contrast in light and dark, and no colour outside the tokens file
+2. `check_tokens.py`, when the config has `design`: token contrast in each theme the app ships, and no colour outside the tokens file
 3. `check_shape.py`, when the config has `architecture`: each module's files in their places, and no source file past the line cap
 4. The spec's acceptance tests and probes, minus behaviors that later tasks will build, and minus the whole-feature `outcome` probes
 

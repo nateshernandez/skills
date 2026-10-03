@@ -33,6 +33,7 @@ A blocking script sets `.dark` before the first paint; `beforeInteractive` doesn
 })();
 ```
 
+- **One theme** → none of this section: tokens only in `:root`, no `.dark` block, no `theme.js`, no choice; `color-scheme: light` (or `dark`) on `:root` so scrollbars and native controls match
 - **Root layout** → `<html suppressHydrationWarning>` and `<head><script src="/theme.js" /></head>`; turn off `@next/next/no-sync-scripts` for `src/app/layout.tsx` only
 - **The choice** → a client component writes `localStorage.theme` as `light`, `dark`, or `system` (only those three) and re-applies in `useLayoutEffect`
 
@@ -78,7 +79,7 @@ function designDriftSelectors() {
   const styleSize = String.raw`\d(px|rem|em)\b`;
   const palette = String.raw`(^|[\s:!])-?(bg|text|border(-[xytrblse])?|ring(-offset)?|outline|divide|fill|stroke|from|via|to|decoration|accent|caret|shadow|placeholder)-(white|black|(${PALETTE.join('|')})-(50|[1-9]00|950))(?![\w-])`;
   const colourMessage = `Raw colour: use a colour token class (bg-card, text-muted-foreground, text-danger) or var(--token) in style. See ${DESIGN_GUIDE}.`;
-  const paletteMessage = `Tailwind palette colour: use a colour token class instead, so the colour follows light and dark. See ${DESIGN_GUIDE}.`;
+  const paletteMessage = `Tailwind palette colour: use a colour token class instead, so the colour follows the theme. See ${DESIGN_GUIDE}.`;
   const sizeMessage = `Arbitrary size: use the theme scale (text-sm, p-2, h-7, rounded-md) or var(--token) in style. See ${DESIGN_GUIDE}.`;
   const strings = (pattern) => [`Literal[value=/${pattern}/]`, `TemplateElement[value.raw=/${pattern}/]`];
   const classNamed = String.raw`/class(es|name)?$/i`;
@@ -110,17 +111,17 @@ function designDriftSelectors() {
 
 ## Checks
 
-- **Routes** → `tests/routes.ts` lists every app route; an axe test scans each, and every `GALLERY_PAGES` entry, in light and dark (`page.emulateMedia({ colorScheme })`, or the stored theme)
+- **Routes** → `tests/routes.ts` lists every app route; an axe test scans each, and every `GALLERY_PAGES` entry, in each theme the app ships (`page.emulateMedia({ colorScheme })`, or the stored theme)
 - **axe** → `@axe-core/playwright` with tags `wcag2a` and `wcag2aa`; the same package `tests/kit/ux-checks.ts` uses
 - **Gallery tests** → a Playwright project against `next dev`, since the gallery exists only there; reuse the URL in `.next/dev/lock` when a dev server is already running
-- **Visual baselines** → off by default (the foundations spec's decision); to opt in, `toHaveScreenshot` on each gallery page at 1280px in both themes, Linux Chromium only, plus a script that accepts new baselines
+- **Visual baselines** → off by default (the foundations spec's decision); to opt in, `toHaveScreenshot` on each gallery page at 1280px in each theme, Linux Chromium only, plus a script that accepts new baselines
 
 ## Decision records
 
 The build's codify step records these, each citing its code:
 
 - **Tokens only in `globals.css`**, named as above, with the look's density
-- **Theme class from a blocking script**, system by default
+- **Theme class from a blocking script**, system by default; or the one theme the app ships
 - **Dev-only gallery** through `pageExtensions` and the page registry
 - **Drift lint** on raw colours, palette colours, arbitrary sizes, and native controls
 - **Layouts from the guide's page-type tree**, and patterns as shared pieces

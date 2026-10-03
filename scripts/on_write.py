@@ -105,7 +105,9 @@ def check_css(path: Path, config: Config) -> str | None:
     if config.design is None or path.suffix != ".css" or "node_modules" in path.parts:
         return None
     problems = [
-        line for line in check_tokens.check_file(path, config) if not line.startswith("skip")
+        line
+        for line in check_tokens.check_file(path, config, config.design.themes)
+        if not line.startswith("skip")
     ]
     if not problems:
         return None

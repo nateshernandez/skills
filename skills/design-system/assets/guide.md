@@ -1,23 +1,23 @@
 # Design guide
 
-Every screen draws from one theme in light and dark. Tokens live only in `<tokens file>`; screens are built from the components in `<components folder>`, the layouts in `<layouts folder>`, and the patterns in `<patterns folder>`. Lint and kit's token check fail on drift and name what to use instead. Where the look came from: [look.md](look.md).
+Every screen draws from one theme in <light and dark | light only | dark only>. Tokens live only in `<tokens file>`; screens are built from the components in `<components folder>`, the layouts in `<layouts folder>`, and the patterns in `<patterns folder>`. Lint and kit's token check fail on drift and name what to use instead. Where the look came from: [look.md](look.md).
 
 ## Look at it
 
 - **The gallery** → on the dev server, open `<gallery route>`: Foundations shows every token by name, Components every component in each state, then a page per layout and pattern. Production builds have no gallery
-- **Screenshots** → `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/screens.py <dir> <route>` writes phone and desktop shots in light and dark
-- **The theme** → light, dark, or system (the default), chosen from <where the choice lives>
+- **Screenshots** → `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/screens.py <dir> <route>` writes phone and desktop shots in each theme the app ships
+- **The theme** → <light, dark, or system (the default), chosen from where the choice lives | light only; there is no dark theme | dark only; there is no light theme>
 
 ## Check it
 
 - **Lint** → rejects raw colours, palette colours, arbitrary sizes, and native controls outside the components folder (see What lint rejects)
-- **Tokens** → kit's `check_tokens.py` runs in every gate: each text pair at least 4.5:1 and each focus ring or control border at least 3:1, in both themes; no colour in any other CSS file
-- **Accessibility** → axe on every route in `<route list file>` and every gallery page, light and dark; a new page adds its route there
+- **Tokens** → kit's `check_tokens.py` runs in every gate: each text pair at least 4.5:1 and each focus ring or control border at least 3:1, in each theme; no colour in any other CSS file
+- **Accessibility** → axe on every route in `<route list file>` and every gallery page, in each theme; a new page adds its route there
 - **UX checks** → UX probes run `tests/kit/ux-checks.ts`: side scroll, tap targets under 44px, clipped text, focus lost to the page
 
 ## Tokens
 
-Use each through its class (`bg-<token>`, `text-<token>`, `border-<token>`) or `var(--<token>)`. Every token has a light and a dark value; a new one also gets a swatch on Foundations.
+Use each through its class (`bg-<token>`, `text-<token>`, `border-<token>`) or `var(--<token>)`. Every token has a value in each theme; a new one also gets a swatch on Foundations.
 
 - **`--background` / `--foreground`** → the page, and body text and headings on it
 - **`--card` / `--card-foreground`** → cards and their text
@@ -131,7 +131,7 @@ Every screen handles the same moments the same way.
 
 ### Keyboard and focus
 
-- **Reaching things** → every control in reading order with a visible focus ring, in both themes
+- **Reaching things** → every control in reading order with a visible focus ring, in each theme
 - **Overlays** → menus, dialogs, and sheets trap Tab and return focus to their trigger on close
 - **A control that leaves while focused** → hands focus to its neighbour (the next row, else the one before, else the list's header), never the page body
 

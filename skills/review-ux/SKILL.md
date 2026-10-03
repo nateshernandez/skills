@@ -62,4 +62,4 @@ flowchart TD
 
 - [references/checklist.md](references/checklist.md): blocker bar and what to look for
 - [../build/references/artifacts.md](../build/references/artifacts.md): findings shape; running the app during review
-- [../../scripts/screens.py](../../scripts/screens.py): phone and desktop, light and dark screenshots
+- [../../scripts/screens.py](../../scripts/screens.py): phone and desktop screenshots in each theme
