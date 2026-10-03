@@ -67,13 +67,13 @@ MARKET_SECTIONS = (
 )
 CITING_SECTIONS = ("Competitors", "Alternatives", "Failed attempts", "Demand", "Complaints")
 BULLET_SECTIONS = ("Not doing", "Unknown")
-NONE_SECTIONS = ("Decide", "Not doing", *CITING_SECTIONS, "Unknown")
 
 
 class Rules(NamedTuple):
     limits: dict[str, tuple[int, int]]
     note_labels: dict[str, str]
     id_kinds: dict[str, str]
+    none_allowed: frozenset[str]
 
 
 BRIEF_RULES = Rules(
@@ -92,15 +92,21 @@ BRIEF_RULES = Rules(
         "Assumptions": "Test",
     },
     id_kinds={"Decide": "PD", "Assumptions": "PA", "First version": "PF"},
+    none_allowed=frozenset(("Decide", "Not doing")),
 )
 MARKET_RULES = Rules(
     limits={"Sources": (1, 60), **dict.fromkeys(CITING_SECTIONS, (1, 15)), "Unknown": (0, 10)},
     note_labels={},
     id_kinds={"Sources": "M"},
+    none_allowed=frozenset((*CITING_SECTIONS[1:], "Unknown")),
 )
 ID_KINDS = BRIEF_RULES.id_kinds
 
-ITEM_RE = re.compile(r"^- \*\*(?P<head>[^*]+?)\*\*\s*→\s*(?P<text>\S.*)$")
+ITEM_RE = re.compile(r"^- \*\*(?P<head>.+?)\*\*\s*→\s*(?P<text>\S.*)$")
+CITATION_RE = re.compile(r"\((?P<cited>M\d+(?:,\s*M\d+)*)\)\s*$")
+QUOTE_RE = re.compile(r'"(?P<quote>[^"]+)"|“(?P<curly>[^”]+)”')
+USERNAME_RE = re.compile(r"(?<![\w/])u/[A-Za-z0-9_-]{3,}")
+MAX_QUOTE_WORDS = 25
 NOTE_RE = re.compile(r"^\s+- _(?P<label>[A-Za-z]+):_\s*(?P<text>\S.*)$")
 ID_HEAD_RE = re.compile(r"^(?P<item_id>(?P<kind>P[DAF]|M)\d+) (?P<name>\S.*)$")
 EVIDENCE_RE = re.compile(r"^(?P<grade>sourced|inferred|assumed|validated|stated)\b(?P<refs>.*)$")
@@ -232,6 +238,7 @@ def lint_brief(brief_text: str, market_text: str | None, approved_text: str | No
         *lint_brief_fields(fields),
         *lint_shape(document, BRIEF_SECTIONS, REQUIRED_BRIEF_SECTIONS, MAX_BRIEF_LINES),
         *lint_pitch(document.intro_lines),
+        *lint_quotes(document.lines),
     ]
     problems += lint_sections(document, BRIEF_RULES)
     assumptions = {item_id(item): item.text for item in items_in(document, "Assumptions")}
@@ -253,6 +260,7 @@ def lint_market(market_text: str) -> list[str]:
     problems = [
         *lint_shape(document, MARKET_SECTIONS, MARKET_SECTIONS, MAX_MARKET_LINES),
         *lint_sections(document, MARKET_RULES),
+        *lint_quotes(document.lines),
     ]
     if not DATE_RE.match(fields.get("researched", "")):
         problems.append("frontmatter: `researched:` should be the date, like 2026-10-03")
@@ -406,7 +414,7 @@ def lint_section(section: Section, rules: Rules) -> list[str]:
     if section.name not in rules.limits:
         return []
     if section.is_none:
-        return [] if section.name in NONE_SECTIONS else [f"{section.name}: can't be `none`"]
+        return [] if section.name in rules.none_allowed else [f"{section.name}: can't be `none`"]
     if section.name in BULLET_SECTIONS:
         return lint_bullets(section, rules)
     problems = [
@@ -518,11 +526,26 @@ def lint_assumption_refs(
 
 
 def lint_citations(item: Item, source_ids: frozenset[str], section_name: str) -> list[str]:
-    cited_ids = SOURCE_ID_RE.findall(f"{item.head} {item.text}")
-    if not cited_ids:
-        return [f"{section_name}: `{item.head[:40]}` cites no source, like (M2, M5)"]
+    citation_match = CITATION_RE.search(item.text)
+    if not citation_match:
+        return [f"{section_name}: `{item.head[:40]}` should end with its sources, like (M2, M5)"]
+    cited_ids = SOURCE_ID_RE.findall(citation_match.group("cited"))
     unknown_ids = [cited for cited in cited_ids if cited not in source_ids]
     return [f"{section_name}: {unknown_ids} aren't under Sources"] if unknown_ids else []
+
+
+def lint_quotes(lines: list[str]) -> list[str]:
+    problems = []
+    for line in lines:
+        for quote_match in QUOTE_RE.finditer(line):
+            quote = quote_match.group("quote") or quote_match.group("curly")
+            if len(quote.split()) > MAX_QUOTE_WORDS:
+                problems.append(f"quote: `{quote[:40]}...` is over {MAX_QUOTE_WORDS} words")
+        problems += [
+            f"username: `{username}`; quote people without their names"
+            for username in USERNAME_RE.findall(line)
+        ]
+    return problems
 
 
 def lint_verdict(fields: dict[str, str], document: Document) -> list[str]:
