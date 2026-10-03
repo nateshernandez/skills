@@ -9,7 +9,7 @@ The look comes from measuring real screens, not from adjectives. Mobbin's connec
 ## What to search
 
 - **The apps the requester named** → their main list, a detail page, a form or settings page, and sign-in, in light and dark when both exist
-- **The product type** → two or three leaders the requester didn't name, so the look isn't one app's copy: "invoice list in a finance app", "dense issue tracker list"
+- **The product type** → two or three leaders the requester didn't name, so the look isn't one app's copy: "invoice list in a finance app", "dense issue tracker list"; start from `docs/product/market.md`'s competitors when it exists
 - **Each core screen the second spec builds** → list, detail, form, settings, empty state, delete confirm, notice
 - **Platform** → `web` for a web app, `ios` for an iPhone app; never mixed in one look
 - **Queries** → describe one screen and what's on it; no style words ("modern", "clean"), no negations, one intent per query

@@ -12,7 +12,7 @@ An approved spec and guide that place every piece of code, with checks that fail
 ## In
 
 - The codebase: stack, folders, and any modules or shared code it already has
-- What the app does and the nouns its people say, from README and specs (ask if missing)
+- What the app does and the nouns its people say, from `docs/product/brief.md`'s Words, README, and specs (ask if missing)
 - `.claude/kit/config.json`; scripts run as `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/<name>.py`
 
 ## Out

@@ -11,7 +11,7 @@ Two approved specs and a design guide that, once built, let agents ship accessib
 
 ## In
 
-- The app's purpose, users, themes (light, dark, or both), and 2–3 apps whose look the requester likes (ask if missing)
+- Purpose and users (from `docs/product/brief.md` if present), themes (light, dark, both), 2–3 apps whose look they like (ask if missing)
 - The codebase: stack, and any tokens or components it already has
 - Mobbin's connector (`search_screens`, `search_flows`); without it, screenshots or URLs from the requester
 - `.claude/kit/config.json` with `screenshots` set; scripts run as `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/<name>.py`
