@@ -1,8 +1,8 @@
 ---
-name: architecture
+name: define-architecture
 description: >
   Use when: an app needs the architecture agents place code by: layers, module shape, shared homes, UI code.
-  Not when: recording one choice (write-decision), or the look and components (design-system).
+  Not when: recording one choice (write-decision), or the UI's look (define-design-system).
 ---
 
 ## Goal

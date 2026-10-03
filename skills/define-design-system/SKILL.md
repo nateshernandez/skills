@@ -1,5 +1,5 @@
 ---
-name: design-system
+name: define-design-system
 description: >
   Use when: an app needs the design system agents build its UI from: look, tokens, theme, components, core screens.
   Not when: one feature's spec (write-spec), or reviewing built screens (review-ux).

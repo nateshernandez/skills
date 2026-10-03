@@ -75,7 +75,7 @@ flowchart TD
 
 - [references/format.md](references/format.md): sections, item shape, lenses, limits
 - [references/example.md](references/example.md): a complete spec, for reference
-- [../design-system/references/research.md](../design-system/references/research.md): searching Mobbin and citing what it finds
+- [../define-design-system/references/research.md](../define-design-system/references/research.md): searching Mobbin and citing what it finds
 - [assets/spec-template.md](assets/spec-template.md): blank spec, copied for each new spec
 - [../../scripts/new_spec.py](../../scripts/new_spec.py): creates the next numbered spec folder
 - [../../scripts/lint_spec.py](../../scripts/lint_spec.py): format and ID-permanence lint; also runs on every write
