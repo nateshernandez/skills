@@ -2,6 +2,12 @@
 
 What each release of kit changes for the people using it. Newest first.
 
+## 0.4.0 (2026-10-02)
+
+- **Added** `design.themes` in the config: an app that ships only light or only dark sets it, and contrast checks, screenshots, and UX reviews cover just that theme
+- **Added** `--theme=light` or `--theme=dark` on `check_tokens.py` and `screens.py`, for a one-theme app's prototypes before the config has `design`
+- **Changed** `/kit:design-system` asks whether the app ships light, dark, or both, and a one-theme app gets no theme switcher, no `.dark` tokens, and specs in that theme only
+
 ## 0.3.0 (2026-10-02)
 
 - **Added** `/kit:architecture`: writes an architecture spec and `docs/architecture.md` that give every file one home by layer and module, plus the recipe's rules; a recipe for Next.js, and a baseline so an app with existing code can adopt it
