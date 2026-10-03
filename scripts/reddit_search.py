@@ -5,16 +5,17 @@ Usage:
   reddit_search.py subreddits NAME [NAME ...]          subscribers and description of each;
                                                        `NAME*` lists subreddits starting NAME
   reddit_search.py posts SUBREDDIT QUERY [--since=12m] [--max=100]
-  reddit_search.py comments SUBREDDIT QUERY [--since=12m] [--max=100]
+  reddit_search.py comments SUBREDDIT QUERY [--since=12m] [--max=25]
   reddit_search.py thread POST_ID [--max=20]
 
---since is a date (2025-10-01) or an age: 30d, 12m (30-day months), 2y. --max caps what's fetched.
+--since is a date (2025-10-01) or an age: 30d, 12m (30-day months), 2y. --max caps what's
+fetched; comment search is slow on Arctic Shift, so it fetches 25 unless told otherwise.
 Posts and comments print most engaged first, after a summary line and a `cite:` URL that reruns
-the search. `[builder?]` marks text that reads like someone selling or validating a product.
-Keyword search needs a subreddit, so find the customer's subreddits first. Scores and comment
-counts settle about 36 hours after posting. Arctic Shift isn't affiliated with Reddit and has no
-uptime promise. When it's busy, this waits as told for up to 3 minutes, then gives up; answers
-from the last day come from a cache in the temp dir.
+the first page of the search. `[builder?]` marks text that reads like someone selling or
+validating a product. Keyword search needs a subreddit, so find the customer's subreddits first.
+Scores and comment counts settle about 36 hours after posting. Arctic Shift isn't affiliated with
+Reddit and has no uptime promise. When it's busy, this waits as told for up to 3 minutes, then
+gives up; answers from the last day come from a cache in the temp dir.
 """
 
 import hashlib
@@ -42,7 +43,8 @@ PAGE_PAUSE_SECONDS = 1.0
 DEFAULT_WAIT_SECONDS = 10
 MAX_WAIT_SECONDS = 60
 MAX_RUN_SECONDS = 180
-RUN_DEADLINE = time.monotonic() + MAX_RUN_SECONDS
+RUN_START = time.monotonic()
+RUN_DEADLINE = RUN_START + MAX_RUN_SECONDS
 CACHE_DIR = Path(tempfile.gettempdir()) / "kit-arctic-shift"
 CACHE_SECONDS = 24 * 60 * 60
 BUSY_WORDS = ("slow down", "timeout", "timed out")
@@ -51,14 +53,15 @@ THREAD_FETCH_LIMIT = 500
 EXCERPT_CHARS = 280
 ENGAGED_COMMENTS = 20
 DEFAULT_SINCE = "12m"
-DEFAULT_MAX = {"posts": 100, "comments": 100, "thread": 20}
+DEFAULT_MAX = {"posts": 100, "comments": 25, "thread": 20}
 DAYS_PER_UNIT = {"d": 1, "m": 30, "y": 365}
 
 AGE_RE = re.compile(r"(?P<count>\d+)(?P<unit>[dmy])")
 FLAG_RE = re.compile(r"--(?P<name>since|max)=(?P<value>\S+)")
 POST_ID_RE = re.compile(r"(?:t3_)?(?P<post_id>[a-z0-9]+)")
 BUILDER_RE = re.compile(
-    r"\b(?:disclosure|i built|founder|dm me|waitlist"
+    r"\b(?:disclosure|i built|founder|dm me|market research|pick your brains?|talk me out of"
+    r"|would you (?:use|pay)|how much of your (?:day|week|month|time)|what part of your (?:day|job)"
     r"|(?:i'?m|we'?re|i am|we are|thinking of|ended up|been) building"
     r"|building (?:a|an|something|my|this)\b|built (?:a|an|something) to"
     r"|my (?:app|startup|tool|saas|product|side project)|our (?:app|tool|product|platform)"
@@ -279,7 +282,7 @@ def fetch(path: str, params: dict[str, str]) -> list[dict]:
 def wait_out(busy: ArchiveBusyError) -> None:
     if time.monotonic() + busy.wait_seconds > RUN_DEADLINE:
         raise ArchiveError(
-            f"still busy after {MAX_RUN_SECONDS // 60} minutes ({busy}); "
+            f"still busy after {round(time.monotonic() - RUN_START)}s ({busy}); "
             "try again later, or say so under Unknown"
         )
     print(f"Arctic Shift is busy; waiting {busy.wait_seconds}s", file=sys.stderr)
@@ -374,7 +377,7 @@ def format_posts(search: Search, posts: list[Post]) -> str:
         f"{engaged_count} with {ENGAGED_COMMENTS}+ comments",
         f"{sum(looks_like_builder(full_text(post)) for post in posts)} [builder?]",
     ]
-    lines = [header(search, summary, archive_url(POSTS_PATH, post_params(search)))]
+    lines = [header(search, summary, cite_url(POSTS_PATH, post_params(search), search))]
     for post in ranked:
         lines.append(
             f"{post.created}  {post.score} pts  {post.comment_count} comments"
@@ -392,7 +395,7 @@ def format_comments(search: Search, comments: list[Comment]) -> str:
         f"in {len({comment.post_id for comment in comments})} threads",
         f"{sum(looks_like_builder(comment.text) for comment in comments)} [builder?]",
     ]
-    lines = [header(search, summary, archive_url(COMMENTS_PATH, comment_params(search)))]
+    lines = [header(search, summary, cite_url(COMMENTS_PATH, comment_params(search), search))]
     lines += [format_comment(comment) for comment in ranked]
     return "\n".join(lines)
 
@@ -421,9 +424,15 @@ def format_comment(comment: Comment) -> str:
     return f"{comment.created}  {comment.score} pts{marker}  {link}\n    {excerpt(comment.text)}"
 
 
-def header(search: Search, summary: list[str], cite_url: str) -> str:
+def cite_url(path: str, params: dict[str, str], search: Search) -> str:
+    """The first page exactly as fetched, so rerunning it gives the same count up to 100."""
+    limit = str(min(search.max_results, PAGE_SIZE))
+    return archive_url(path, {**params, "sort": "desc", "limit": limit})
+
+
+def header(search: Search, summary: list[str], cite_link: str) -> str:
     heading = f'r/{search.subreddit} · "{search.query}" · since {search.since}: '
-    return f"{heading}{' · '.join(summary)}\ncite: {cite_url}\n"
+    return f"{heading}{' · '.join(summary)}\ncite: {cite_link}\n"
 
 
 def capped_note(found: int, max_results: int) -> str:
