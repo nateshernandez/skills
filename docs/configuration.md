@@ -39,7 +39,7 @@ Every command runs from the project root through your shell. Unknown fields are 
 
 ## Design
 
-`/kit:design-system` writes the `design` block once its specs are approved. With it set:
+`/kit:define-design-system` writes the `design` block once its specs are approved. With it set:
 
 - Builders read `design.guide` before building UI, planners name each task's layout and patterns from it, and the UX reviewer judges screens against it
 - `check_tokens.py` runs in every task gate and whenever an agent writes a CSS file: it fails when a token pair is below its contrast minimum in a theme from `design.themes`, or when a CSS file other than `design.tokens` holds a raw colour
@@ -69,7 +69,7 @@ An app that ships one theme sets `themes` to it, so kit checks and screenshots o
 
 ## Architecture
 
-`/kit:architecture` writes the `architecture` block once its spec is approved. With it set:
+`/kit:define-architecture` writes the `architecture` block once its spec is approved. With it set:
 
 - Planners name each new file's home from `architecture.guide`, builders place code by it, and the code reviewer judges against it
 - `check_shape.py` runs in every task gate and on every file an agent writes. It fails when a module's root holds a file outside `module_files`, when a module holds a folder outside `module_folders` or a subfolder in one, when a folder's file matches none of its globs, or when a source file passes `max_lines`
