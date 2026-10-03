@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Screenshot pages at phone and desktop widths, in light and dark, with the configured browser.
+"""Screenshot pages at phone and desktop widths, in each theme, with the configured browser.
 
-Usage: screens.py OUT_DIR TARGET [TARGET ...]
+Usage: screens.py [--theme=light|dark] OUT_DIR TARGET [TARGET ...]
   TARGET is a route like `/settings` (joined to `app.url`), a full URL, or a local .html file.
   Writes OUT_DIR/<name>-<mobile|desktop>-<light|dark>.png and prints each path.
+  Themes are `design.themes`, light and dark when unset; `--theme` takes only that one.
 
 The `screenshots` config field is the command prefix, like `pnpm exec playwright screenshot`;
 add `--load-storage=<file>` to it to capture pages behind sign-in.
@@ -15,9 +16,16 @@ import sys
 from pathlib import Path
 from typing import NamedTuple
 
-from kit_config import Config, ConfigError, fill, load
+from kit_config import (
+    Config,
+    ConfigError,
+    ThemeName,
+    configured_themes,
+    fill,
+    load,
+    split_theme_flag,
+)
 
-COLOR_SCHEMES = ("light", "dark")
 WAIT_MS = 500
 
 
@@ -30,27 +38,29 @@ VIEWPORTS = (Viewport("mobile", "390,844"), Viewport("desktop", "1280,800"))
 
 
 def main() -> int:
-    if len(sys.argv) < 3:
-        print(__doc__, file=sys.stderr)
-        return 1
-    out_dir = Path(sys.argv[1])
     try:
+        theme_flag, arguments = split_theme_flag(sys.argv[1:])
+        if len(arguments) < 2:
+            print(__doc__, file=sys.stderr)
+            return 1
         config = load()
     except ConfigError as error:
         print(error, file=sys.stderr)
         return 1
+    out_dir = Path(arguments[0])
+    themes = configured_themes(config, theme_flag)
     if config.screenshots is None:
         print("no `screenshots` command in .claude/kit/config.json", file=sys.stderr)
         return 1
     out_dir.mkdir(parents=True, exist_ok=True)
     any_failed = False
-    for target in sys.argv[2:]:
+    for target in arguments[1:]:
         url = target_url(config, target)
         if url is None:
             print(f"`{target}`: a route needs `app.url` in the config", file=sys.stderr)
             any_failed = True
             continue
-        any_failed |= not capture(config, url, out_dir.resolve() / page_name(target))
+        any_failed |= not capture(config, url, out_dir.resolve() / page_name(target), themes)
     return 1 if any_failed else 0
 
 
@@ -70,10 +80,10 @@ def page_name(target: str) -> str:
     return slug or "home"
 
 
-def capture(config: Config, url: str, name_path: Path) -> bool:
+def capture(config: Config, url: str, name_path: Path, themes: tuple[ThemeName, ...]) -> bool:
     is_ok = True
     for viewport in VIEWPORTS:
-        for color_scheme in COLOR_SCHEMES:
+        for color_scheme in themes:
             image_path = name_path.with_name(f"{name_path.name}-{viewport.name}-{color_scheme}.png")
             command = (
                 f"{config.screenshots} --full-page --wait-for-timeout={WAIT_MS}"

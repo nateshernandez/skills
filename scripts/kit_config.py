@@ -23,7 +23,7 @@ TOP_LEVEL_FIELDS = frozenset(
         *("design", "architecture", "build"),
     )
 )
-DESIGN_FIELDS = frozenset(("guide", "tokens", "gallery", "contrast"))
+DESIGN_FIELDS = frozenset(("guide", "tokens", "gallery", "contrast", "themes"))
 ARCHITECTURE_FIELDS = frozenset(
     (
         *("guide", "modules", "module_files", "module_folders"),
@@ -65,11 +65,16 @@ class ContrastPair(NamedTuple):
     minimum: float
 
 
+ThemeName = Literal["light", "dark"]
+THEME_NAMES: tuple[ThemeName, ...] = get_args(ThemeName)
+
+
 class Design(NamedTuple):
     guide: Path
     tokens: Path
     gallery: str | None
     contrast: tuple[ContrastPair, ...]
+    themes: tuple[ThemeName, ...]
 
 
 class Architecture(NamedTuple):
@@ -263,7 +268,36 @@ def parse_design(raw_design: object, root: Path) -> Design:
         tokens=root / required_text(raw_design, "tokens", "design.", "a path"),
         gallery=gallery,
         contrast=parse_contrast(raw_design.get("contrast", [])),
+        themes=parse_themes(raw_design.get("themes", list(THEME_NAMES))),
     )
+
+
+def parse_themes(raw_themes: object) -> tuple[ThemeName, ...]:
+    raw_list = raw_themes if isinstance(raw_themes, list) else []
+    themes: tuple[ThemeName, ...] = tuple(t for t in THEME_NAMES if t in raw_list)
+    # Equal lengths rule out duplicates and unknown names alike.
+    if not themes or len(themes) != len(raw_list):
+        message = f'{CONFIG_PATH}: design.themes must be ["light", "dark"], ["light"], or ["dark"]'
+        raise ConfigError(message)
+    return themes
+
+
+def configured_themes(config: Config, flag: ThemeName | None) -> tuple[ThemeName, ...]:
+    """The themes a check covers: `--theme` first, then `design.themes`, else both."""
+    if flag is not None:
+        return (flag,)
+    return config.design.themes if config.design else THEME_NAMES
+
+
+def split_theme_flag(arguments: list[str]) -> tuple[ThemeName | None, list[str]]:
+    """Pull `--theme=light` or `--theme=dark` out of a script's arguments."""
+    flags = [argument for argument in arguments if argument.startswith("--theme")]
+    rest = [argument for argument in arguments if argument not in flags]
+    matches: list[ThemeName] = [t for t in THEME_NAMES if flags == [f"--theme={t}"]]
+    if flags and not matches:
+        message = "pass one --theme=light or --theme=dark"
+        raise ConfigError(message)
+    return (matches[0] if matches else None), rest
 
 
 def parse_build(raw_build: object) -> Build:

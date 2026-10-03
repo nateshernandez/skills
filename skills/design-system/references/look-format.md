@@ -41,6 +41,6 @@ Estimates from compressed previews, rounded to the 4px grid.
 ## Rules
 
 - **A measured value** → names the source screens in brackets; one with no source is a guess, so mark it `(chosen)`
-- **A proposed colour** → both themes, in the project's colour format, with the contrast of its main pair
+- **A proposed colour** → each theme the app ships, in the project's colour format, with the contrast of its main pair
 - **Token names** → the project's existing names first, then shadcn's (`background`, `foreground`, `card`, `muted`, `primary`, `border`, `input`, `ring`), then `<status>` and `<status>-bg` for status colours, so `check_tokens.py` finds the pairs by name
 - **Decided against** → the strongest alternatives, each one line; they become the specs' Alts

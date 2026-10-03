@@ -48,3 +48,5 @@ An agent building any screen picks its layout from the guide and handles every c
 ![Detail at phone width, dark](screens/detail-mobile-dark.png)
 ![Form in a side sheet](screens/form-desktop-light.png)
 ![Delete confirm](screens/confirm-desktop-light.png)
+
+<a one-theme app shows every screen in that theme>

@@ -12,7 +12,7 @@ kit's bar for every app. The project's design guide (`design.guide` in the confi
 - **Dead end**: a page or state with no way back or on, a missing page included
 - **Text is cut off, overlaps, or scrolls sideways**; text a person or the data wrote, like a name or an email, can't be read in full at 390px
 - **Tap target under 44px** at 390px, links inside running text aside
-- **Contrast fails** WCAG AA in light or dark, as axe reports it
+- **Contrast fails** WCAG AA in a theme the app ships, as axe reports it
 - **Looks foreign**: hand-rolls a control the project's components already have, or ignores its tokens
 - **Breaks the design guide**: the guide has a rule for this case and the screen doesn't follow it; cite the guide's line
 
@@ -25,11 +25,11 @@ kit's bar for every app. The project's design guide (`design.guide` in the confi
 
 ## How to look
 
-- **Run the UX checks** → in the UX probe, `uxProblems(page)` from `tests/kit/ux-checks.ts` on each route at 390px, light and dark; `focusLost(page)` after each action
+- **Run the UX checks** → in the UX probe, `uxProblems(page)` from `tests/kit/ux-checks.ts` on each route at 390px, in each theme the app ships (the config's `design.themes`, both when unset); `focusLost(page)` after each action
   - Missing the file → kit's setup copies it; check the same things by hand and say so in a note
 - **Fill the worst case** → the longest name and email, many items, zero items, a slow response
 - **Act, then look** → after every action, where is focus, and what says it worked or failed?
 - **Squint test** → is the most important thing the most visible?
 - **Read every word** on screen as a first-time visitor
 - **Compare** against the design guide's layout for this screen, then an existing screen of the app, for type scale, spacing, and colour
-- **Check both themes**; a colour that works in one often fails in the other
+- **Check each theme the app ships**; a colour that works in one often fails in the other. A theme it doesn't ship isn't a finding

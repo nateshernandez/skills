@@ -25,6 +25,7 @@ Every command runs from the project root through your shell. Unknown fields are 
 | `design.tokens` | with `design` | The one CSS file that defines colour tokens, such as `src/app/globals.css`; kit checks its contrast |
 | `design.gallery` | no | Route of the dev-only gallery that shows every token and component, such as `/design` |
 | `design.contrast` | no | Token pairs to check beyond the ones kit finds by name, like `"link on background"` |
+| `design.themes` | no | The themes the app ships: `["light", "dark"]` (the default), `["light"]`, or `["dark"]`; checks and screenshots skip the other |
 | `architecture.guide` | with `architecture` | The architecture guide agents place code by and reviewers judge it against, such as `docs/architecture.md` |
 | `architecture.modules` | with `architecture` | The folder holding one folder per business module, such as `src/modules` |
 | `architecture.module_files` | with `architecture` | The only files a module's root may hold, such as `["index.ts", "server.ts", "actions.ts"]` |
@@ -41,9 +42,9 @@ Every command runs from the project root through your shell. Unknown fields are 
 `/kit:design-system` writes the `design` block once its specs are approved. With it set:
 
 - Builders read `design.guide` before building UI, planners name each task's layout and patterns from it, and the UX reviewer judges screens against it
-- `check_tokens.py` runs in every task gate and whenever an agent writes a CSS file: it fails when a token pair is below its contrast minimum in light or dark, or when a CSS file other than `design.tokens` holds a raw colour
+- `check_tokens.py` runs in every task gate and whenever an agent writes a CSS file: it fails when a token pair is below its contrast minimum in a theme from `design.themes`, or when a CSS file other than `design.tokens` holds a raw colour
 
-Pairs kit finds by name, in both themes:
+Pairs kit finds by name, in each theme:
 
 | Tokens | Pair |
 | --- | --- |
@@ -54,6 +55,8 @@ Pairs kit finds by name, in both themes:
 Add any other pair to `design.contrast` as `"<token> on <token>"`, without the `--`. The minimum is 4.5:1, the WCAG AA bar for text; follow the pair with a number for another, like `"ring on background 3"` for a focus ring or a control's border.
 
 The light theme is every `:root`, `html`, and `@theme` block. The dark theme is light plus every block whose selector or `@media` query names `dark`, such as `.dark`, `[data-theme="dark"]`, or `prefers-color-scheme: dark`. A colour in another token's `var()` is followed; one kit can't read, like `color-mix()`, is listed as skipped.
+
+An app that ships one theme sets `themes` to it, so kit checks and screenshots only that one. A dark-only app can keep its tokens in `:root`; kit reads them as the dark theme. `check_tokens.py` and `screens.py` take `--theme=light` or `--theme=dark` to do the same before the config has `design`, as a design system's prototypes need.
 
 ```json
 "design": {
