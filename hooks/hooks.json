@@ -30,6 +30,11 @@
             "type": "command",
             "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/gate.py\" --hook",
             "timeout": 900
+          },
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/lint_product.py\" --hook",
+            "timeout": 60
           }
         ]
       }
