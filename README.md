@@ -27,6 +27,8 @@ claude plugin marketplace add nateshernandez/skills
 claude plugin install kit@nateshernandez
 ```
 
+**Starting from an idea?** Run `/kit:define-product` first, even in an empty repo. It researches the market and challenges the idea before you build anything (see [Product briefs](#product-briefs)).
+
 **2. Set up your project.** In a Claude Code session in your repo:
 
 ```
@@ -67,6 +69,24 @@ You touch two files: the spec, before anything is built, and the report, at the 
 
 Each build works on its own branch and leaves a short, linear history: one commit for the spec, one for the tests, one per task, one per review round, and one for the records. Subjects are imperative one-liners, like `Dedupe repeated waitlist joins`. Branches land by rebasing, never by merge commits.
 
+## Product briefs
+
+Run `/kit:define-product <your idea>` before anything is built. Its job is to tell you whether the product has a chance and what has to be true for it to work, in a brief an investor could read.
+
+```
+/kit:define-product An app that gets small-business clients to send their bookkeeper receipts
+```
+
+1. **Intake.** It asks only what research can't answer: your ambition (venture, bootstrapped, or indie), why you, your constraints, and who you've already talked to. Ambition sets the bar, because a fine indie business can be a bad venture pitch.
+2. **Research first.** A market researcher sees only the idea, never a draft, and writes `docs/product/market.md`: competitors and their prices, alternatives like spreadsheets, products that failed and why, demand, and complaints. Every row links to a source.
+3. **Reddit, counted.** `reddit_search.py` searches the customer's own subreddits through [Arctic Shift](https://github.com/ArthurHeitmann/arctic_shift), a free community archive of Reddit. Results are ranked by engagement, posts that read like founders validating ideas are flagged, and each count comes with a link that reruns the search.
+4. **The brief.** `docs/product/brief.md` covers customer, problem, alternatives, solution, why now, market size counted bottom-up, model, channels, edge, and why you. Every claim carries an evidence grade: `sourced`, `inferred`, `assumed`, `validated`, or `stated`. Each guess becomes an assumption (`PA1`) with the cheapest test that could prove it wrong.
+5. **A skeptical review.** A product reviewer starts from fresh context, checks each claim against its sources, redoes the arithmetic, and runs a pre-mortem. A blocker that research can't settle comes to you as one question, for up to three rounds.
+6. **A verdict.** Go, narrow, pivot, or stop, with pain, reach, willingness to pay, the gap, edge, why you, and size each rated from the evidence. Stop is a good outcome: it costs a day instead of months.
+7. **What to build first.** Only features that test an assumption, riskiest first, each a `/kit:build` request. Often the first is a landing page with the real price on it. `docs/product/validation.md` holds an interview script and the bar each test must clear, decided before it runs.
+
+Once approved, the rest of kit reads the brief. Specs check they serve its customer, the design system starts its research from its competitors, and the architecture names modules after its words.
+
 ## Architecture
 
 Run `/kit:define-architecture` once, before or after the design system, so every feature's code lands where the next reader expects it.
@@ -93,6 +113,7 @@ The system grows as features need it: a screen the guide doesn't cover gets a de
 
 | Command | What it does |
 | --- | --- |
+| `/kit:define-product` | Researches an idea's market, challenges it, and writes a product brief with a verdict |
 | `/kit:setup` | Writes the config, checks the gate is green, and adds a CLAUDE.md section |
 | `/kit:define-architecture` | Writes the spec and guide for where your app's code goes, and the checks that hold it there |
 | `/kit:define-design-system` | Researches a look on Mobbin and writes the specs and guide for your app's design system |
@@ -104,7 +125,7 @@ The system grows as features need it: a screen the guide doesn't cover gets a de
 | `/kit:write-agent` | Writes a subagent, with write fences |
 | `/kit:write-changelog-entry` | Logs a change to your project's `.claude/` setup |
 
-The agents run the rest of the skills: `plan-spec`, `write-acceptance-tests`, `build-task`, `verify-spec`, `review-code`, `review-security`, and `review-ux`.
+The agents run the rest of the skills: `research-market`, `review-product`, `plan-spec`, `write-acceptance-tests`, `build-task`, `verify-spec`, `review-code`, `review-security`, and `review-ux`.
 
 ## What kit adds to your project
 
@@ -114,6 +135,7 @@ The agents run the rest of the skills: `plan-spec`, `write-acceptance-tests`, `b
 .claude/rules/git-commits.md     commit, branch, and push conventions, unless you have your own
 specs/<NNN>-<slug>/              spec, plan, tasks, progress, reviews, screens, report
 docs/decisions/<NNNN>-<slug>.md  decision records, written after review
+docs/product/                    brief, market research, reviews, validation plan, if you run /kit:define-product
 docs/architecture.md             where code goes, if you run /kit:define-architecture
 docs/design/guide.md, look.md    the design system agents build UI from, if you run /kit:define-design-system
 tests/acceptance/, tests/probes/ acceptance tests and reviewers' probes (paths are configurable)
