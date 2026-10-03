@@ -7,6 +7,7 @@ Does nothing in a project without .claude/kit/config.json. Otherwise, by what wa
   specs/<id>/spec.md                            lint_spec.py
   specs/<id>/reviews/*.md, report.md, a probe   lint_outputs.py
   docs/decisions/*.md                           lint_decision.py
+  docs/product/ brief, market, reviews          lint_product.py
   .claude/skills/*/SKILL.md                     lint_skill.py
   .claude/rules/*.md                            lint_rule.py
   .claude/agents/*.md                           lint_agent.py
@@ -30,6 +31,7 @@ import lint_agent
 import lint_changelog
 import lint_decision
 import lint_outputs
+import lint_product
 import lint_rule
 import lint_skill
 import lint_spec
@@ -42,6 +44,7 @@ FORMAT_GUIDES = {
     "spec": "skills/write-spec/references/format.md",
     "outputs": "skills/build/references/artifacts.md",
     "decision": "skills/write-decision/references/format.md",
+    "product": "skills/define-product/references/brief-format.md",
     "skill": "skills/write-skill/references/format.md",
     "rule": "skills/write-rule/references/format.md",
     "agent": "skills/write-agent/references/format.md",
@@ -94,6 +97,7 @@ def kit_file_kinds(path: Path, config: Config) -> dict[str, bool]:
         "spec": path.name == "spec.md" and path.parent.parent == config.specs_dir,
         "outputs": lint_outputs.is_build_output(path, config),
         "decision": is_markdown and path.parent == config.decisions_dir,
+        "product": lint_product.is_product_file(path, config.root),
         "skill": path.name == "SKILL.md" and path.parent.parent == claude_dir / "skills",
         "rule": is_markdown and path.parent == claude_dir / "rules",
         "agent": is_markdown and path.parent == claude_dir / "agents",
@@ -177,6 +181,7 @@ LINTERS: dict[str, Linter] = {
     "spec": ignoring_config(lint_spec.lint),
     "outputs": lint_build_output,
     "decision": ignoring_config(lint_decision.lint),
+    "product": ignoring_config(lint_product.lint),
     "skill": ignoring_config(lint_skill.lint),
     "rule": ignoring_config(lint_rule.lint),
     "agent": ignoring_config(lint_agent.lint),
