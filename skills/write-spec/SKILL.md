@@ -12,7 +12,7 @@ A `specs/<id>/spec.md` the requester approves in two minutes, replying by ID.
 ## In
 
 - The request, in the requester's words (ask if missing)
-- The codebase: what exists, what the stack forces
+- The codebase: what exists, what the stack forces; `docs/product/brief.md`, if present: who it's for
 
 ## Out
 

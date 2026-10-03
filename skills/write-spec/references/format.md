@@ -45,6 +45,7 @@ A spec is the contract between the requester and the build team. The requester a
 ## Lenses
 
 - **Product** → the outcome line, Not doing, and whether each behavior earns its place
+  - With `docs/product/brief.md`: the outcome serves its Customer, and nothing crosses its Not doing; a conflict becomes a D item
 - **Design** → Looks like; each screen's states (empty, loading, error, success) and its longest real content
 - **UX** → error recovery, keyboard use and where focus goes after each action, phone width, copy the user reads
 - **Tech** → decisions the stack forces (storage, server vs client)
