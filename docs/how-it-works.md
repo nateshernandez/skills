@@ -2,6 +2,16 @@
 
 kit is a Claude Code plugin made of skills (what to do), agents (who does it, with which tools and files), scripts (checks that don't drift), and hooks (which run those checks without being asked). This page explains the pieces you'll see while a build runs.
 
+## A product starts with a brief
+
+`/kit:define-product` runs before anything is built and writes `docs/product/`. It works like a build, aimed at the business instead of the code:
+
+- **Evidence before opinion.** The market researcher writes `market.md` from the idea alone, so research isn't bent to fit a draft. Each source is a link, and Reddit counts come from `reddit_search.py` with a URL that reruns the search.
+- **Graded claims.** Every claim in `brief.md` is `sourced` or `inferred` (citing `market.md`'s M IDs), `assumed` or `validated` (citing a `PA` assumption), or `stated` by you. `lint_product.py` checks that each citation exists, and that `validated` points at an assumption that `holds`.
+- **An independent skeptic.** The product reviewer reads the files from fresh context and writes blocker or note findings, each with evidence, just like a build's reviewers.
+- **A verdict with rules.** `go` can't stand with any dimension rated `weak`, and `go` or `narrow` needs a first version in which every feature tests an assumption.
+- **Permanent IDs.** Once the brief is approved, its `PD`, `PA`, and `PF` IDs keep their wording; changing one means retiring it, as in a spec.
+
 ## The spec is the contract
 
 A spec is one screen of bullets in `specs/<NNN>-<slug>/spec.md`:
@@ -34,6 +44,8 @@ Each agent's frontmatter lists the files it may write (`fence-allow`) or may not
 
 | Agent | Writes | Reads |
 | --- | --- | --- |
+| market-researcher | `docs/product/market.md` | the idea, the web, Reddit through Arctic Shift |
+| product-reviewer | product review findings | brief, market research, the web |
 | planner | `plan.md`, `tasks.json` | spec, code, decisions |
 | test-author | acceptance tests | spec, plan's routes |
 | builder | app code and unit tests; not specs, tasks, tests, probes, reviews, or `.claude/` | spec, plan, progress, tests |
@@ -42,7 +54,7 @@ Each agent's frontmatter lists the files it may write (`fence-allow`) or may not
 | security-reviewer | security probes, security findings | the diff, plan's risks |
 | ux-reviewer | UX probes, UX findings, screens | spec, screenshots |
 
-Fences work for your own agents too: add `fence-allow` or `fence-deny` to an agent in `.claude/agents/`.
+Fences apply once `.claude/kit/config.json` exists, so a product brief written before setup runs unfenced. Fences work for your own agents too: add `fence-allow` or `fence-deny` to an agent in `.claude/agents/`.
 
 ## Reviews need evidence
 
@@ -81,10 +93,11 @@ A build commits the spec, the acceptance tests, each task, each review round's f
 | Hook | Script | What it does |
 | --- | --- | --- |
 | Before a write | `fence.py` | Blocks a subagent's write outside its fence |
-| After a write | `on_write.py` | Formats and lints source files; lints specs, findings, reports, probes, decisions, skills, rules, agents, and the `.claude/` changelog; checks CSS files' colours when the config has `design`, and each file's place and length when it has `architecture` |
+| After a write | `on_write.py` | Formats and lints source files; lints specs, findings, reports, probes, product files, decisions, skills, rules, agents, and the `.claude/` changelog; checks CSS files' colours when the config has `design`, and each file's place and length when it has `architecture` |
 | When a subagent stops | `gate.py --hook` | Sends kit's builder back to work while the task gate is red |
+| When a subagent stops | `lint_product.py --hook` | Sends the market researcher or product reviewer back while its file fails the lint |
 
-All three exit at once in a project without `.claude/kit/config.json`.
+All four exit at once in a project without `.claude/kit/config.json`.
 
 ## Writing your own skills, rules, and agents
 
