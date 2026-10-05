@@ -12,6 +12,17 @@ kit is a Claude Code plugin made of skills (what to do), agents (who does it, wi
 - **A verdict with rules.** `go` can't stand with any dimension rated `weak`, and `go` or `narrow` needs a first version in which every feature tests an assumption.
 - **Permanent IDs.** Once the brief is approved, its `PD`, `PA`, and `PF` IDs keep their wording; changing one means retiring it, as in a spec.
 
+## A deck is built like a feature
+
+`/kit:write-deck` makes presentations with the same pieces, aimed at an argument instead of code. It needs no kit config, so it works in any folder.
+
+- **The storyline is the contract.** `decks/<id>/storyline.md` has the audience, the ask, and one item per slide: an `S` number, an id, a layout, and the title as a full-sentence claim, with what evidence the slide shows. `render_deck.py --wireframes` draws each slide with its real title, so you approve the argument and its shape together.
+- **Titles carry the story.** Each slide's heading must match its storyline title word for word, so the deck you approved is the deck that ships. A content title is a claim of 4 to 15 words, never a question, a list of three, or a phrase from the copy list.
+- **Two checks, like a gate.** `lint_deck.py` reads the files: word caps per layout, list lengths, colours and sizes from the style only, speaker notes on every presented slide, and the tells of generated copy. `render_deck.py` renders each slide in headless Chrome at 1920×1080 and fails overflow, text outside the margins, overlapping text, low contrast, a title past two lines, a heading that moves between content slides, and a body that floats away from its heading.
+- **Three lenses.** The story, design, and copy reviewers each start from fresh context. The copy reviewer reads only the slides, never the storyline, so it meets the words the way the audience will.
+- **The repo is the source; Slides is the stage.** `publish_deck.py` stages the files a Claude Slides artifact expects and sends only the slides that changed. Before applying comments it pulls your hand edits back into the repo, so nothing you changed in Slides is overwritten.
+- **A house style.** `docs/deck/style.json` sets fonts, colours, sizes, title rules, and banned phrases, and the scripts enforce them. `guide.md` holds house rules that need judgment, and `voice.md` quotes your own writing so slides and notes sound like you.
+
 ## The spec is the contract
 
 A spec is one screen of bullets in `specs/<NNN>-<slug>/spec.md`:
@@ -53,6 +64,8 @@ Each agent's frontmatter lists the files it may write (`fence-allow`) or may not
 | code-reviewer | code findings | the diff, rules, decisions |
 | security-reviewer | security probes, security findings | the diff, plan's risks |
 | ux-reviewer | UX probes, UX findings, screens | spec, screenshots |
+| slide-builder | a deck's slides, assets, screens | storyline, style, guide, voice, sources |
+| deck-reviewer | deck review findings | its lens's inputs only |
 
 Fences apply once `.claude/kit/config.json` exists, so a product brief written before setup runs unfenced. Fences work for your own agents too: add `fence-allow` or `fence-deny` to an agent in `.claude/agents/`.
 
@@ -93,7 +106,7 @@ A build commits the spec, the acceptance tests, each task, each review round's f
 | Hook | Script | What it does |
 | --- | --- | --- |
 | Before a write | `fence.py` | Blocks a subagent's write outside its fence |
-| After a write | `on_write.py` | Formats and lints source files; lints specs, findings, reports, probes, product files, decisions, skills, rules, agents, and the `.claude/` changelog; checks CSS files' colours when the config has `design`, and each file's place and length when it has `architecture` |
+| After a write | `on_write.py` | Formats and lints source files; lints specs, findings, reports, probes, product files, deck files, decisions, skills, rules, agents, and the `.claude/` changelog; checks CSS files' colours when the config has `design`, and each file's place and length when it has `architecture` |
 | When a subagent stops | `gate.py --hook` | Sends kit's builder back to work while the task gate is red |
 | When a subagent stops | `lint_product.py --hook` | Sends the market researcher or product reviewer back while its file fails the lint |
 
