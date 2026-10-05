@@ -109,6 +109,21 @@ For an app with a UI, run `/kit:define-design-system` once before building featu
 
 The system grows as features need it: a screen the guide doesn't cover gets a decision in its own spec, and a piece a second feature reuses moves into the guide. Version 1 has a recipe for Next.js, Tailwind 4, and shadcn.
 
+## Decks
+
+Run `/kit:write-deck <what the deck is for>` for a presentation. It runs like a build: you approve a short storyline, agents build against it, scripts check what can be checked, and reviewers judge the rest. It needs Chrome or Chromium for rendering, and no kit config.
+
+```
+/kit:write-deck A 15-minute board update on Q3, from docs/q3/finance.xlsx
+```
+
+1. **Storyline.** `decks/001-q3-board/storyline.md` lists every slide as one claim, with a layout and the evidence it shows, plus wireframes of each slide. Read the titles alone and they make the argument. You reply by slide number: "S4: use a table."
+2. **Slides.** A slide builder writes each slide in the Claude Slides format and renders it in headless Chrome. `lint_deck.py` holds titles, word caps, the palette, type sizes, and generated phrasing. `render_deck.py` fails overflow, text outside the margins, overlapping text, low contrast, and headings that move between slides.
+3. **Three reviews.** Story (do the titles make the case?), design (does each slide pass a three-second glance?), and copy (does it read like a person wrote it?). The copy reviewer never sees the storyline, just as the audience never does.
+4. **Publish.** The deck goes to a private Claude Slides artifact, where you present it, comment on slides, or export it to PowerPoint, PDF, or Canva. Comments come back to the builder, and edits you make in Slides are pulled into the repo before anything is republished.
+
+Run `/kit:define-deck-style` once to set the house look from your brand files in `docs/deck/brand/`: colours, fonts, type scale, title rules, banned words, and a voice guide drawn from your own writing. It shows the result as a specimen deck with one slide per layout.
+
 ## Skills
 
 | Command | What it does |
@@ -118,6 +133,8 @@ The system grows as features need it: a screen the guide doesn't cover gets a de
 | `/kit:define-architecture` | Writes the spec and guide for where your app's code goes, and the checks that hold it there |
 | `/kit:define-design-system` | Researches a look on Mobbin and writes the specs and guide for your app's design system |
 | `/kit:build` | Runs a feature from request to report, or resumes one |
+| `/kit:write-deck` | Writes a presentation from storyline to published Claude Slides deck |
+| `/kit:define-deck-style` | Sets your decks' look, title rules, and voice from your brand files |
 | `/kit:write-spec` | Writes a spec on its own, for planning ahead |
 | `/kit:write-decision` | Records an architecture or policy choice in `docs/decisions/` |
 | `/kit:write-rule` | Writes a `.claude/rules/` file that loads only where it applies |
@@ -125,7 +142,7 @@ The system grows as features need it: a screen the guide doesn't cover gets a de
 | `/kit:write-agent` | Writes a subagent, with write fences |
 | `/kit:write-changelog-entry` | Logs a change to your project's `.claude/` setup |
 
-The agents run the rest of the skills: `research-market`, `review-product`, `plan-spec`, `write-acceptance-tests`, `build-task`, `verify-spec`, `review-code`, `review-security`, and `review-ux`.
+The agents run the rest of the skills: `research-market`, `review-product`, `plan-spec`, `write-acceptance-tests`, `build-task`, `verify-spec`, `review-code`, `review-security`, `review-ux`, `build-slides`, and `review-deck`.
 
 ## What kit adds to your project
 
@@ -140,6 +157,8 @@ docs/architecture.md             where code goes, if you run /kit:define-archite
 docs/design/guide.md, look.md    the design system agents build UI from, if you run /kit:define-design-system
 tests/acceptance/, tests/probes/ acceptance tests and reviewers' probes (paths are configurable)
 tests/kit/ux-checks.ts           UX checks the UX reviewer runs on every screen, for Playwright apps
+decks/<NNN>-<slug>/              a deck's storyline, slides, screens, and reviews, if you run /kit:write-deck
+docs/deck/                       your decks' style, guide, and voice, if you run /kit:define-deck-style
 ```
 
 kit's hooks do nothing in a project without `.claude/kit/config.json`, so it's safe to install at user scope.

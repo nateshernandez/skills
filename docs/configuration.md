@@ -125,6 +125,22 @@ The mode is written into the spec's frontmatter as `mode:`, so you see it when y
 
 `turbo_model` applies only to turbo builds, and never to the security reviewer. It takes whatever the Agent tool accepts: an alias such as `sonnet` or `haiku`, or a full model ID.
 
+## Deck style
+
+Decks read their own file, not `config.json`: `docs/deck/style.json`, or a deck's own `decks/<id>/style.json`, which replaces it for that deck. `/kit:define-deck-style` writes it; [skills/define-deck-style/references/style-format.md](../skills/define-deck-style/references/style-format.md) is the full reference. Unknown fields are an error.
+
+| Field | Required | What it is |
+| --- | --- | --- |
+| `kind` | no | `presented` (the default) or `read`; a read deck's slides may hold 2.5 times the words |
+| `fonts` | yes | `heading` and `body`, and any other role, each `{family, href}`; `href` is a `https://fonts.googleapis.com/css2?…` link, left out for a basic face; at most 3 families |
+| `colors` | yes | Named `#rrggbb` colours including `background`, `text`, `muted`, `accent`; every opaque colour on a slide must be one |
+| `sizes` | yes | Named px sizes including `title`, `body`, `small`; at most 5, none under 24; every text element must use one |
+| `titles.case` | no | `sentence` (the default), `title`, or `any` |
+| `titles.max_words` | no | The most words a slide title may have, 4 to 25; 15 when left out |
+| `banned` | no | Phrases that fail the lint, added to kit's own list |
+
+`render_deck.py` needs Chrome or Chromium. It looks in the usual install paths and Playwright's download; set `KIT_BROWSER` to a browser binary to use another.
+
 ## Placeholders
 
 kit fills these in and shell-quotes each value, so don't add quotes around them.
