@@ -1,0 +1,34 @@
+{
+  "kind": "presented",
+  "fonts": {
+    "heading": {
+      "family": "Source Serif 4",
+      "href": "https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600&display=swap"
+    },
+    "body": {
+      "family": "Public Sans",
+      "href": "https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&display=swap"
+    }
+  },
+  "colors": {
+    "background": "#f6f4ef",
+    "surface": "#ebe7df",
+    "line": "#d6d0c4",
+    "text": "#1c2230",
+    "muted": "#535c6b",
+    "accent": "#b33f0b",
+    "inverse": "#f6f4ef"
+  },
+  "sizes": {
+    "number": 180,
+    "display": 96,
+    "title": 60,
+    "body": 32,
+    "small": 24
+  },
+  "titles": {
+    "case": "sentence",
+    "max_words": 15
+  },
+  "banned": []
+}
