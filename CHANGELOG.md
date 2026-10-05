@@ -2,6 +2,16 @@
 
 What each release of kit changes for the people using it. Newest first.
 
+## 0.5.0 (2026-10-05)
+
+- **Added** `/kit:write-deck`: writes a presentation as a storyline you approve with wireframes, builds the slides, reviews them for story, design, and copy, and publishes them to a Claude Slides deck you can present, comment on, and export
+- **Added** `/kit:define-deck-style`: turns brand files in `docs/deck/brand/` into a deck style, house rules, and a voice guide, shown as a specimen deck
+- **Added** `lint_deck.py` and `render_deck.py`: fail a deck's slides on title rules, word caps, off-style colours and sizes, generated-sounding copy, overflow, overlap, low contrast, and headings that move; deck files are linted on each write
+- **Added** `/kit:define-product`: researches an idea's market, including Reddit counts through Arctic Shift, writes a product brief with graded evidence, has a skeptical reviewer challenge it, and ends with a verdict and a validation plan
+- **Added** `lint_product.py`: checks the brief's citations and verdict rules on each write and before the market researcher or product reviewer stops
+- **Changed** `/kit:architecture` is now `/kit:define-architecture` and `/kit:design-system` is now `/kit:define-design-system`; call them by the new names
+- **Changed** specs, setup, the design system, and the architecture read `docs/product/brief.md` when it exists
+
 ## 0.4.0 (2026-10-02)
 
 - **Added** `design.themes` in the config: an app that ships only light or only dark sets it, and contrast checks, screenshots, and UX reviews cover just that theme
