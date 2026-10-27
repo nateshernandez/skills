@@ -7,7 +7,7 @@ description: >
 
 ## Goal
 
-A `docs/product/market.md` where every competitor, complaint, and demand signal links to a source anyone can open.
+A `docs/product/research/market.md` where every competitor, complaint, and demand signal links to a source anyone can open.
 
 ## In
 
@@ -17,7 +17,7 @@ A `docs/product/market.md` where every competitor, complaint, and demand signal 
 
 ## Out
 
-- `docs/product/market.md` (references/market-format.md)
+- `docs/product/research/market.md` (references/market-format.md)
 
 ## Flow
 
@@ -57,7 +57,7 @@ flowchart TD
 
 ## Done When
 
-- [ ] `lint_product.py docs/product/market.md` passes
+- [ ] `lint_product.py docs/product/research/market.md` passes
 - [ ] Every source was opened, and every Reddit count carries its `cite:` URL
 - [ ] Competitors include the leader; Failed attempts was searched; Unknown names the gaps
 

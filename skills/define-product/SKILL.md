@@ -18,7 +18,7 @@ An approved `docs/product/brief.md` whose every claim cites evidence or names th
 ## Out
 
 - `docs/product/brief.md` from assets/brief-template.md (references/brief-format.md)
-- `docs/product/market.md` and `reviews/product-r<n>.md`, from the market-researcher and product-reviewer
+- `docs/product/research/market.md` and `research/reviews/product-r<n>.md`, from the market-researcher and product-reviewer
 - `docs/product/validation.md` from assets/validation-template.md
 
 ## Flow
@@ -27,7 +27,7 @@ An approved `docs/product/brief.md` whose every claim cites evidence or names th
 flowchart TD
   A["Read docs/product/; ask what files and research can't answer"] --> B["market-researcher: market.md"]
   B --> C["Fill the brief from assets/brief-template.md; lint_product.py"]
-  C --> D["product-reviewer: reviews/product-r<n>.md"]
+  C --> D["product-reviewer: research/reviews/product-r<n>.md"]
   D --> E{"Blockers and round < 3?"}
   E -- "research can settle it" --> B
   E -- "only the requester knows: ask one question per blocker" --> C

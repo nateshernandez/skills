@@ -31,7 +31,7 @@ Every command runs from the project root through your shell. Unknown fields are 
 | `design.gallery` | no | Route of the dev-only gallery that shows every token and component, such as `/design` |
 | `design.contrast` | no | Token pairs to check beyond the ones kit finds by name, like `"link on background"` |
 | `design.themes` | no | The themes the app ships: `["light", "dark"]` (the default), `["light"]`, or `["dark"]`; checks and screenshots skip the other |
-| `architecture.guide` | with `architecture` | The architecture guide agents place code by and reviewers judge it against, such as `docs/architecture.md` |
+| `architecture.guide` | with `architecture` | The architecture guide agents place code by and reviewers judge it against, such as `docs/architecture/guide.md` |
 | `architecture.modules` | with `architecture` | The folder holding one folder per business module, such as `src/modules` |
 | `architecture.module_files` | with `architecture` | The only files a module's root may hold, such as `["index.ts", "server.ts", "actions.ts"]` |
 | `architecture.module_folders` | with `architecture` | Each folder a module may hold, mapped to the file name globs it allows, such as `{"domain": ["*.ts"]}` |
@@ -105,7 +105,7 @@ An app that ships one theme sets `themes` to it, so kit checks and screenshots o
 
 ## Architecture
 
-`/kit:define-architecture` writes the `architecture` block once its spec is approved. With it set:
+`/kit:define-architecture` writes the `architecture` block once its spec is approved, with the guide at `docs/architecture/guide.md`. An app whose guide is at `docs/architecture.md` keeps working: `architecture.guide` is the only place the path lives. With it set:
 
 - Planners name each new file's home from `architecture.guide`, builders place code by it, and the code reviewer judges against it
 - `check_shape.py` runs in every task gate and on every file an agent writes. It fails when a module's root holds a file outside `module_files`, when a module holds a folder outside `module_folders` or a subfolder in one, when a folder's file matches none of its globs, or when a source file passes `max_lines`
@@ -116,7 +116,7 @@ An app with code from before the architecture sets `baseline` and runs `python3 
 
 ```json
 "architecture": {
-  "guide": "docs/architecture.md",
+  "guide": "docs/architecture/guide.md",
   "modules": "src/modules",
   "module_files": ["index.ts", "server.ts", "actions.ts"],
   "module_folders": {

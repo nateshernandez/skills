@@ -1,6 +1,6 @@
 # market.md format
 
-`docs/product/market.md` is the evidence the brief stands on. The brief's `sourced` and `inferred` claims cite its M IDs; the product reviewer opens its links. `lint_product.py` checks the shape. Keep it to 150 non-blank lines.
+`docs/product/research/market.md` is the evidence the brief stands on. The brief's `sourced` and `inferred` claims cite its M IDs; the product reviewer opens its links. `lint_product.py` checks the shape. Keep it to 150 non-blank lines.
 
 ## Shape
 

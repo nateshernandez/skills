@@ -6,9 +6,9 @@ paths:
 
 # Code placement
 
-Every file has one home, found by the question tree in docs/architecture.md; folder names say what's inside.
+Every file has one home, found by the question tree in docs/architecture/guide.md; folder names say what's inside.
 
-- **Creating a file** → place it with "Where code goes" in docs/architecture.md before writing it
+- **Creating a file** → place it with "Where code goes" in docs/architecture/guide.md before writing it
   - _Because:_ the home is a few questions away; a wrong one costs a move later
 - **Writing a page, layout, or route handler** → build who's asking, call use cases, then render or respond; nothing more
   - _Because:_ logic in a route can't be reused by forms, endpoints, or other modules

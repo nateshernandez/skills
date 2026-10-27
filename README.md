@@ -78,7 +78,7 @@ Run `/kit:define-product <your idea>` before anything is built. Its job is to te
 ```
 
 1. **Intake.** It asks only what research can't answer: your ambition (venture, bootstrapped, or indie), why you, your constraints, and who you've already talked to. Ambition sets the bar, because a fine indie business can be a bad venture pitch.
-2. **Research first.** A market researcher sees only the idea, never a draft, and writes `docs/product/market.md`: competitors and their prices, alternatives like spreadsheets, products that failed and why, demand, and complaints. Every row links to a source.
+2. **Research first.** A market researcher sees only the idea, never a draft, and writes `docs/product/research/market.md`: competitors and their prices, alternatives like spreadsheets, products that failed and why, demand, and complaints. Every row links to a source.
 3. **Reddit, counted.** `reddit_search.py` searches the customer's own subreddits through [Arctic Shift](https://github.com/ArthurHeitmann/arctic_shift), a free community archive of Reddit. Results are ranked by engagement, posts that read like founders validating ideas are flagged, and each count comes with a link that reruns the search.
 4. **The brief.** `docs/product/brief.md` covers customer, problem, alternatives, solution, why now, market size counted bottom-up, model, channels, edge, and why you. Every claim carries an evidence grade: `sourced`, `inferred`, `assumed`, `validated`, or `stated`. Each guess becomes an assumption (`PA1`) with the cheapest test that could prove it wrong.
 5. **A skeptical review.** A product reviewer starts from fresh context, checks each claim against its sources, redoes the arithmetic, and runs a pre-mortem. A blocker that research can't settle comes to you as one question, for up to three rounds.
@@ -93,7 +93,7 @@ Run `/kit:define-architecture` once, before or after the design system, so every
 
 1. **Homes.** Routes, business modules, shared UI, platform (database, session, outside services), and pure helpers. Imports flow one way, and code moves to a shared home only when a second module needs it.
 2. **One module shape.** Each module has the same entries and four flat folders: `use-cases/` (what can be done), `domain/` (the rules), `infra/` (storage and outside services), and `components/` (the UI). Imports point inward, so rules test without mocks.
-3. **A spec and a guide.** The architecture spec builds the lint, and `docs/architecture.md` is the contract: a question tree that places any code, examples for each file role, and the UI rules.
+3. **A spec and a guide.** The architecture spec builds the lint, and `docs/architecture/guide.md` is the contract: a question tree that places any code, examples for each file role, and the UI rules.
 4. **Checks.** The recipe's lint fails a broken boundary on the write. `check_shape.py` fails a file a module has no place for, or a source file past 250 lines.
 
 An existing app keeps working while it moves: its current files go in a baseline that only shrinks, and each move is its own spec. Version 1 has a recipe for Next.js and React.
@@ -102,7 +102,7 @@ An existing app keeps working while it moves: its current files go in a baseline
 
 For an app with a UI, run `/kit:define-design-system` once before building features. It needs Mobbin's connector, or screenshots of apps you like.
 
-1. **Research.** It measures real screens from the apps you name and writes `docs/design/look.md`, citing each by its Mobbin link.
+1. **Research.** It measures real screens from the apps you name and writes `docs/design/research/look.md`, citing each by its Mobbin link.
 2. **Two specs.** Design foundations (tokens, theme, gallery, drift lint) and core screens (list, detail, form, settings, notices, deletes, waiting, empty). You approve them like any spec.
 3. **A guide.** `docs/design/guide.md` is the contract: planners pick each screen's layout from it, builders follow it, and the UX reviewer cites it.
 4. **Checks.** `check_tokens.py` fails any token pair under WCAG AA in each theme the app ships, and any colour outside the tokens file. The UX reviewer runs axe, tap target, clipped text, and lost focus checks on every screen.
@@ -152,10 +152,11 @@ The agents run the rest of the skills: `research-market`, `review-product`, `pla
 .claude/rules/git-commits.md     commit, branch, and push conventions, unless you have your own
 specs/<NNN>-<slug>/              spec, plan, tasks, progress, reviews, screens, report
 docs/decisions/<NNNN>-<slug>.md  decision records, written after review
-docs/product/                    brief, market research, reviews, validation plan, if you run /kit:define-product
-docs/architecture.md             where code goes, if you run /kit:define-architecture
-docs/design/guide.md, look.md    the design system agents build UI from, if you run /kit:define-design-system
-tests/acceptance/, tests/probes/ acceptance tests and reviewers' probes (paths are configurable)
+docs/product/brief.md            the product, in one file; research/ holds market.md and reviews, if you run /kit:define-product
+docs/architecture/guide.md       where code goes; one file per system design the builds promote, if you run /kit:define-architecture
+docs/design/guide.md             the design system agents build UI from; research/look.md holds its sources, if you run /kit:define-design-system
+tests/acceptance/, tests/unit/   end-to-end and unit-level behavior tests per spec (paths are configurable)
+tests/support/, tests/probes/    helpers shared by test files, and the probes that found a defect
 tests/kit/ux-checks.ts           UX checks the UX reviewer runs on every screen, for Playwright apps
 decks/<NNN>-<slug>/              a deck's storyline, slides, screens, and reviews, if you run /kit:write-deck
 docs/deck/                       your decks' style, guide, and voice, if you run /kit:define-deck-style

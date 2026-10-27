@@ -12,12 +12,12 @@ Each claim in the brief survives a skeptical investor's questions, or the brief 
 ## In
 
 - The round number, from the prompt (ask if missing)
-- `docs/product/brief.md`, `market.md`, and earlier `reviews/product-r<n>.md`
+- `docs/product/brief.md`, `market.md`, and earlier `research/reviews/product-r<n>.md`
 - Scripts named here run as `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/<name>.py`
 
 ## Out
 
-- `docs/product/reviews/product-r<round>.md` (../define-product/references/brief-format.md)
+- `docs/product/research/reviews/product-r<round>.md` (../define-product/references/brief-format.md)
 
 ## Flow
 

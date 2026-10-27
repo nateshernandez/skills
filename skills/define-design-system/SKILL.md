@@ -18,7 +18,7 @@ Two approved specs and a design guide that, once built, let agents ship accessib
 
 ## Out
 
-- `docs/design/look.md`: sources, measurements, proposed tokens (references/look-format.md)
+- `docs/design/research/look.md`: sources, measurements, proposed tokens (references/look-format.md)
 - `specs/<NNN>-design-foundations/`: spec, `recipe.md`, `specimen.html`, screens
 - `specs/<NNN>-core-screens/`: spec, one prototype per layout and pattern shown, screens
 - `docs/design/guide.md` from assets/guide.md, the `design` block in the config, and `.claude/kit/checklists/ux.md`
@@ -29,7 +29,7 @@ Two approved specs and a design guide that, once built, let agents ship accessib
 flowchart TD
   A["Read the codebase; pick the recipe in assets/recipes/"] --> B["Ask for the brief"]
   B --> C["Research on Mobbin (references/research.md)"]
-  C --> D["Write docs/design/look.md"]
+  C --> D["Write docs/design/research/look.md"]
   D --> E["new_spec.py design-foundations; fill assets/foundations-spec.md; recipe.md; specimen.html"]
   E --> F{"check_tokens.py on the specimen passes?"}
   F -- no --> D

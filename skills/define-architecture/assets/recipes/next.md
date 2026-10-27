@@ -221,7 +221,7 @@ The config's `architecture` block:
 
 ```json
 "architecture": {
-  "guide": "docs/architecture.md",
+  "guide": "docs/architecture/guide.md",
   "modules": "src/modules",
   "module_files": ["index.ts", "server.ts", "actions.ts"],
   "module_folders": {

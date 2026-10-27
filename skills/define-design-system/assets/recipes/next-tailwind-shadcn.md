@@ -6,7 +6,7 @@ How the design foundations and core screens specs get built in a Next.js app sty
 
 - **Where** → `src/app/globals.css` only, and the config's `design.tokens` names it: light values in `:root`, dark in `.dark`, and Tailwind classes from `@theme inline { --color-<token>: var(--<token>); }`
 - **Names** → shadcn's (`background`, `foreground`, `card`, `popover`, `primary`, `secondary`, `muted`, `accent`, `border`, `input`, `ring`, `sidebar-*`) plus `<status>` and `<status>-bg` for success, warning, danger, and info
-- **Values** → from `docs/design/look.md`, in `oklch()`; `check_tokens.py` checks every pair kit finds by name, plus the config's `design.contrast`
+- **Values** → from `docs/design/research/look.md`, in `oklch()`; `check_tokens.py` checks every pair kit finds by name, plus the config's `design.contrast`
 - **Scale** → `@theme` sets the type scale (`--text-xs` … `--text-2xl`), radii (`--radius-sm` … `--radius-xl`), and one `--shadow-popover`; spacing stays Tailwind's 4px steps
 - **Touch** → controls use the `pointer-coarse:` variant to reach 44px, like `h-7 pointer-coarse:h-11`
 

@@ -18,7 +18,7 @@ An approved spec and guide that place every piece of code, with checks that fail
 ## Out
 
 - `specs/<NNN>-architecture/`: spec from assets/architecture-spec.md, the recipe and its lint file; `moves.md` for an existing app
-- `docs/architecture.md` from assets/guide.md
+- `docs/architecture/guide.md` from assets/guide.md
 - The recipe's rules in `.claude/rules/`, and the `architecture` block in the config
 - `.claude/kit/architecture-baseline.json`, for an existing app
 
@@ -30,7 +30,7 @@ flowchart TD
   B -- yes --> C["Map each file to its home in moves.md (references/existing-app.md)"]
   B -- no --> D["new_spec.py architecture; fill assets/architecture-spec.md; copy the recipe and its lint"]
   C --> D
-  D --> E["Write docs/architecture.md from assets/guide.md"]
+  D --> E["Write docs/architecture/guide.md from assets/guide.md"]
   E --> F{"Requester approves the spec and guide?"}
   F -- "no: replies by ID" --> D
   F -- yes --> G["Rules, config block, baseline; commit; /kit:build the spec"]

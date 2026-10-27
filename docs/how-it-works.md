@@ -12,6 +12,17 @@ kit is a Claude Code plugin made of skills (what to do), agents (who does it, wi
 - **A verdict with rules.** `go` can't stand with any dimension rated `weak`, and `go` or `narrow` needs a first version in which every feature tests an assumption.
 - **Permanent IDs.** Once the brief is approved, its `PD`, `PA`, and `PF` IDs keep their wording; changing one means retiring it, as in a spec.
 
+## Docs have one front door per area
+
+Each area under `docs/` has one file agents read by default and a `research/` folder for the evidence behind it, read only when a claim needs checking:
+
+- `docs/product/brief.md` is the whole product on one page; its claims cite `research/market.md` by ID, so a separate summary would only drift
+- `docs/design/guide.md` is the design system; `research/look.md` holds the measured screens it came from
+- `docs/architecture/guide.md` says where code goes, beside one file per system design (a data model, a protocol) promoted from a spec's `design.md` after review
+- `docs/decisions/` holds one record per choice
+
+A project that already has `docs/product/market.md` or `docs/product/reviews/` keeps working: kit looks in both places. New runs write under `research/`.
+
 ## A deck is built like a feature
 
 `/kit:write-deck` makes presentations with the same pieces, aimed at an argument instead of code. It needs no kit config, so it works in any folder.
@@ -62,7 +73,7 @@ Each agent's frontmatter lists the files it may write (`fence-allow`) or may not
 
 | Agent | Writes | Reads |
 | --- | --- | --- |
-| market-researcher | `docs/product/market.md` | the idea, the web, Reddit through Arctic Shift |
+| market-researcher | `docs/product/research/market.md` | the idea, the web, Reddit through Arctic Shift |
 | product-reviewer | product review findings | brief, market research, the web |
 | planner | `plan.md`, `tasks.json` | spec, code, decisions |
 | test-author | behavior tests (end to end and unit level), shared test helpers | spec, plan's tests and routes |
@@ -93,7 +104,7 @@ After the last round passes, the orchestrator codifies what the build settled:
 - **Decision records** in `docs/decisions/` for each choice in the plan marked `record`, written against the reviewed code, with `code:` paths a reader opens first
 - **Rules** in `.claude/rules/` for patterns later code must repeat, scoped by `paths:` so they load only where they apply
 - **Design guide sections** in `docs/design/guide.md` for a UI piece a second feature reused, moved into the shared components
-- **Architecture guide lines** in `docs/architecture.md` for code a second module needed, moved down to its shared home
+- **Architecture guide lines** in `docs/architecture/guide.md` for code a second module needed, moved down to its shared home
 
 Each is listed under Codified in the report, for you to confirm before merging.
 
