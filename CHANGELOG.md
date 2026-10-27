@@ -2,6 +2,17 @@
 
 What each release of kit changes for the people using it. Newest first.
 
+## 0.6.0 (2026-10-27)
+
+- **Added** `tests.unit`, `tests.support`, and `tests.e2e_per_spec` in the config: the planner gives each behavior a unit, component, or end-to-end level, unit-level tests run in every task gate, and `check_coverage.py` fails an end-to-end test with no `// e2e:` reason or a spec past its budget of 4
+- **Added** `check_tests.py`: fails a test helper copied between test files, in every task gate and on each test file an agent writes, when the config has `tests.support`
+- **Added** `design.md` and the `designer` agent: when a spec fixes a data model, protocol, state machine, or contract, you approve a short design with types, flows, and numbered invariants before the plan, and each invariant gets a unit test
+- **Added** parallel builds: a plan's tasks list `needs` and `files`, and independent tasks build side by side in separate git worktrees that `land_task.py` replays onto the spec's branch; `build.parallel` and `build.worktree_setup` in the config tune it
+- **Added** `ready now` in `spec_status.py`, and a check in `mark_task.py` that fails a task which changed a file it didn't list
+- **Changed** probes: the verifier and the UX and security reviewers delete a probe that passes, so the suite keeps only probes that found a defect
+- **Changed** new product research lands in `docs/product/research/`, the architecture guide in `docs/architecture/guide.md`, and the design research in `docs/design/research/look.md`; files at the old paths still work, and `architecture.guide` keeps whatever path you set
+- **Changed** `/kit:setup` presets: Playwright projects get a Vitest unit level and `tests/support`, and every preset gets a `build.worktree_setup` install command to check
+
 ## 0.5.0 (2026-10-05)
 
 - **Added** `/kit:write-deck`: writes a presentation as a storyline you approve with wireframes, builds the slides, reviews them for story, design, and copy, and publishes them to a Claude Slides deck you can present, comment on, and export
