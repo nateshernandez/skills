@@ -56,6 +56,15 @@ When a spec fixes a shape that is costly to change, such as a data model with ve
 - The code reviewer blocks a diff that drifts from the interfaces or breaks an invariant
 - After review, the shapes later specs build on move to `docs/architecture/<topic>.md`
 
+## Independent tasks build side by side
+
+The planner gives each task the task ids it `needs` and the `files` it will write, with the shared types and stubs in the first task. Tasks whose files don't overlap and don't need each other are ready together, and a wave builds them at once: one builder per task, each in its own git worktree with its own gate and port.
+
+- `check_tasks.py` rejects a plan where two tasks that can run together share a path, and `mark_task.py` rejects a task that changed anything it didn't list
+- `land_task.py` replays each finished task's commits onto the spec's branch in the order they passed, so history is the same straight line a sequential build leaves
+- One gate runs on the merged tree after each wave; a failure becomes a fix task, never a reopened one
+- `build.worktree_setup` in the config says how a fresh worktree gets its dependencies and local files
+
 ## Gates decide when a task is done
 
 The builder never marks its own task done. `mark_task.py` runs the **task gate** and flips `passes` only when it's green:
@@ -105,7 +114,7 @@ A probe is a question, not a test to keep: one that passes is deleted. A probe t
 
 ## Turbo builds trade review for speed
 
-A turbo build skips the planner, runs one builder for the whole spec, and reviews once with the verifier, plus the security reviewer when input, storage, auth, or secrets change. Blockers become one fix task that must pass the gate, with no second round, and nothing is codified. The spec, its prototype, your approval, the acceptance tests, the gates, and the full gate are the same as in a standard build. The report's Skipped section names each step left out. [configuration.md](configuration.md#build-modes) compares the two modes step by step.
+A turbo build skips the planner, runs one builder for the whole spec (no waves), and reviews once with the verifier, plus the security reviewer when input, storage, auth, or secrets change. Blockers become one fix task that must pass the gate, with no second round, and nothing is codified. The spec, its prototype, your approval, the acceptance tests, the gates, and the full gate are the same as in a standard build. The report's Skipped section names each step left out. [configuration.md](configuration.md#build-modes) compares the two modes step by step.
 
 ## Builds leave context behind
 

@@ -43,13 +43,18 @@ Everything a build leaves behind lives in `specs/<id>/`. Only `spec.md` and `rep
   "spec": "001-waitlist",
   "base": "<commit sha before the first task>",
   "tasks": [
-    { "id": "T1", "title": "Waitlist form with validation", "covers": ["1.B1", "1.B2"], "passes": false },
+    { "id": "T1", "title": "Waitlist types and storage", "needs": [], "files": ["src/waitlist/types.ts"], "covers": ["1.B1"], "passes": false },
+    { "id": "T2", "title": "Waitlist form with validation", "needs": ["T1"], "files": ["src/waitlist/form/"], "covers": ["1.B2"], "passes": false },
     { "id": "F1", "title": "Fix: error shows before submit", "covers": ["1.B2"], "passes": false }
   ]
 }
 ```
 
 - `T<n>` tasks come from the plan; `F<n>` fix tasks come from blocker findings
+- `needs` lists the task ids that must pass first; `files` lists what the task writes: a file, or a folder ending in `/`. A task's colocated tests (`x.test.ts` for `x.ts`) are its own
+  - A task with neither follows the task before it, so a plain list is a sequential plan
+  - Two tasks that may run together can't share a path; `check_tasks.py` fails it, and `mark_task.py` fails a task that changed anything unlisted
+  - Ready tasks (`spec_status.py` shows them) are built side by side: references/parallel.md
 - `covers` lists behavior IDs; empty only for fixes with no behavior (code findings, outcome blockers)
 
 ## progress.md

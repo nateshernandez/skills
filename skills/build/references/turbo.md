@@ -17,7 +17,7 @@ Everything the build skill says still holds, except where a rule here replaces i
 
 - **Planning** → no planner and no plan.md; write tasks.json yourself: one `T1` covering every behavior, `base` from `git rev-parse HEAD`; `check_tasks.py` passes
   - _Because:_ this is the size S path at any size; one task needs no slicing
-- **Building** → one builder for `T1`, whatever the size
+- **Building** → one builder for `T1`, whatever the size, with no waves
   - _Because:_ cold starts and gates between tasks are where a standard build spends its time
 - **Watching the builder** → judge a stall by its last tool call's age alone; a long total runtime is expected
   - _Because:_ one builder does the work of several, so passing 8 minutes is normal here

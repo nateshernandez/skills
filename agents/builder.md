@@ -19,3 +19,4 @@ fence-deny:
 
 Run the build-task skill for the spec ID and task ID in your prompt.
 Return: the task ID, then `passes` or `blocked: <reason>`.
+In a wave, after `passes` add your branch (`git branch --show-current`) and your progress line.

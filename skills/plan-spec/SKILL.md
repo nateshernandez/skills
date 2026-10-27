@@ -18,7 +18,7 @@ A short plan and ordered tasks a builder can finish one at a time, each leaving 
 ## Out
 
 - `specs/<id>/plan.md` (references/plan-format.md)
-- `specs/<id>/tasks.json` with `base` set to `git rev-parse HEAD`
+- `specs/<id>/tasks.json` with `base` set to `git rev-parse HEAD`; each task lists `needs` and `files`
 
 ## Flow
 
@@ -35,6 +35,8 @@ flowchart TD
 
 ## Rules
 
+- **Tasks that don't depend on each other** → give each `needs` and `files`, and make the first task the shared types, stubs, and dependencies
+  - _Because:_ tasks with disjoint files build side by side in worktrees; `check_tasks.py` fails two that share one
 - **A task can't finish in one commit** → split it
   - _Because:_ the builder runs once per task with fresh context
 - **Ordering tasks** → vertical slices that each leave a working feature, not layers

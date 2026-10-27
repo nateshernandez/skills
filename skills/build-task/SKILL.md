@@ -18,7 +18,7 @@ One task implemented, gated green, marked, committed, and logged; the app works 
 
 - Code and unit tests for this task only, committed
 - `passes: true` in tasks.json, set by `mark_task.py`
-- One line appended to `specs/<id>/progress.md`
+- One line appended to `specs/<id>/progress.md` (returned instead, in a wave)
 
 ## Flow
 
@@ -33,6 +33,8 @@ flowchart TD
 
 ## Rules
 
+- **Your prompt says `wave`** → run `prepare_worktree.py` first; return your progress line instead of writing progress.md
+  - _Because:_ a worktree starts bare, and the orchestrator merges progress and task state
 - **A locked file looks wrong (spec, behavior tests, probes, tasks)** → log `blocked:` with the reason; stop
   - _Because:_ the orchestrator fixes plans; editing a check to pass it is cheating
 - **The same failure survives 3 attempts** → log `blocked:` with the error; stop
@@ -65,8 +67,8 @@ flowchart TD
 ## Done When
 
 - [ ] `mark_task.py <id> <task>` printed `passes`
-- [ ] The commit contains only this task's files
-- [ ] progress.md has `- **<task>** → <what changed; anything the next task should know>`
+- [ ] The commit contains only this task's files; never tasks.json or progress.md
+- [ ] progress.md has `- **<task>** → <what changed; anything the next task should know>`, or you returned it
 
 ## Never
 
