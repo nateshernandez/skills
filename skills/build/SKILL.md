@@ -26,7 +26,8 @@ The requested feature ships working, passes every lens, and comes back as a one-
 flowchart TD
   A["spec_status.py: resume from the files"] --> B{"Spec approved?"}
   B -- "no: write-spec; requester approves" --> B
-  B -- yes --> D["planner: plan.md, tasks.json"] --> E["test-author: failing behavior tests"] --> F["builder: next task"]
+  B -- yes --> D["designer if a shape is costly to change; planner: plan.md, tasks.json"]
+  D --> E["test-author: failing behavior tests"] --> F["builder: next task"]
   F --> G{"All tasks pass?"}
   G -- no --> F
   G -- yes --> H["review_app.py start; reviewers in parallel"]
@@ -39,10 +40,10 @@ flowchart TD
 
 - **Starting or resuming** → run `spec_status.py [number]` and continue from what the files say
   - _Because:_ the files are the team's memory; a new session knows nothing else
-- **Picking the mode** → resolve it per references/turbo.md; in turbo, its rules replace these where they differ
-  - _Because:_ turbo trades the planner, per-task builders, two lenses, and later rounds for speed
 - **Spec just approved** → on a branch named for the spec, set `status: building` and commit before delegating
   - _Because:_ the builder's stop gate only runs for specs marked building
+- **The spec fixes a data model, protocol, state machine, or contract** → run the designer; the requester approves `design.md` before planning
+  - _Because:_ these shapes are costly to reverse, and the plan and parallel tasks build against them
 - **Size S** → skip the planner; write a one-task tasks.json and run `check_tasks.py` on it
   - _Because:_ planning a one-task change costs more than the change
 - **Delegating** → pass only the spec ID, task ID, and round; run one builder at a time
@@ -53,8 +54,6 @@ flowchart TD
   - _Because:_ a wrong locked file is a planning error, not the builder's to patch
 - **No blockers left** → `gate.py <id> --full` once; red → F task per failing test, one rerun, then blocked
   - _Because:_ only the full check catches a break elsewhere; once at the end pays once
-- **A builder runs over 8 minutes or looks stalled** → read its last tool call's age (`stat -L` on its transcript); tell the requester; never stop it on a guess
-  - _Because:_ the task output file is a symlink; plain `stat` reads the link and always looks frozen
 - **Reviewers finish** → `review_app.py stop`; revert edits outside their fences; commit findings, screens, and probes once
   - _Because:_ one commit per round keeps the log readable
 - **Blockers remain after round 3** → set `status: blocked`; report each ✗ with one question
@@ -78,5 +77,4 @@ flowchart TD
 
 - [references/artifacts.md](references/artifacts.md): every file in `specs/<id>/`, task list, findings, report, codify
 - [assets/report-template.md](assets/report-template.md): blank report to copy
-- [references/turbo.md](references/turbo.md): the faster mode: what it cuts, keeps, and reports
-- [../../scripts/spec_status.py](../../scripts/spec_status.py): where each spec stands and its mode
+- [references/turbo.md](references/turbo.md): picking the mode; the faster mode: what it cuts, keeps, and reports

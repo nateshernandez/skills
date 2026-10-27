@@ -12,6 +12,7 @@ A short plan and ordered tasks a builder can finish one at a time, each leaving 
 ## In
 
 - Spec ID (ask if missing); `specs/<id>/spec.md` with `status: building`, and the files beside it, like a prototype or `recipe.md`
+- `specs/<id>/design.md`, when there is one: the plan builds exactly its shapes
 - The codebase, its CLAUDE.md, `docs/decisions/`, and any framework docs CLAUDE.md names
 
 ## Out

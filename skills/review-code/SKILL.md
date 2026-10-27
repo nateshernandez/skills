@@ -15,6 +15,7 @@ The change is simple, idiomatic for this project and its framework versions, ful
 - `git diff <base>`, with base from tasks.json
 - The project's CLAUDE.md, `.claude/rules/`, `docs/decisions/`, and `.claude/kit/checklists/code.md` if present
 - The architecture guide `architecture.guide` names in the config, if set
+- `specs/<id>/design.md`, if there is one
 
 ## Out
 
@@ -45,6 +46,8 @@ flowchart TD
   - _Because:_ the builder's last gate already ran them; a rerun costs minutes and repeats a green result
 - **Code sits outside the home the architecture guide gives it** → blocker; cite the guide's line and name the home
   - _Because:_ the next feature copies from what's there, so a misplaced file multiplies
+- **Diff drifts from design.md's Interfaces or breaks an invariant** → blocker; cite the line
+  - _Because:_ the design is what the requester approved and what parallel tasks built against
 - **Tempted to redesign** → note it; don't block on it
   - _Because:_ the spec is met; redesign is a new spec
 

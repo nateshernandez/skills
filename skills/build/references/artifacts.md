@@ -5,6 +5,7 @@ Everything a build leaves behind lives in `specs/<id>/`. Only `spec.md` and `rep
 ## Files
 
 - **`spec.md`** → the approved contract (write-spec)
+- **`design.md`** → the shapes costly to change: data model, interfaces, flows, invariants; designer writes it, requester approves it (design-spec); only when the spec needs one
 - **`plan.md`** → approach, files, risks; planner writes it (plan-spec)
 - **`tasks.json`** → ordered tasks; only `mark_task.py` flips `passes`
 - **`progress.md`** → append-only log, one line per builder run
@@ -18,6 +19,11 @@ Everything a build leaves behind lives in `specs/<id>/`. Only `spec.md` and `rep
   - A probe is scratch: one that passes is deleted, so the file holds only probes that found a defect
   - Kept probes don't print (`console.log`); `lint_outputs.py` checks both when a probe is written
   - The task gate skips `<n>.outcome` probes; the full gate runs them
+
+## Watching a builder
+
+- A builder over 8 minutes or looking stalled → read its last tool call's age with `stat -L` on its transcript, and tell the requester; never stop it on a guess
+  - The task output file is a symlink, so plain `stat` reads the link and always looks frozen
 
 ## During review
 
@@ -87,6 +93,8 @@ After the latest round passes and before the report, turn what the build settled
 
 - **Each entry under plan.md's Decisions marked `record`** → write it with write-decision, citing this build's code
   - _Because:_ written against reviewed code, a record describes the architecture that exists, not a guess
+- **A shape in design.md that later specs build on** → move it to `docs/architecture/<topic>.md`, kept to the shape as built, and link it from the guide
+  - _Because:_ specs get archived in practice; the next feature finds the data model in docs, not in an old spec folder
 - **A pattern the diff set that later code must repeat** → propose it as a rule (write-rule), or a lint config change
   - _Because:_ rules come from code that exists, so they match the architecture instead of predicting it
 - **A second feature reuses a UI piece the first one built** → move it to the shared components, with a section in the design guide and a gallery page

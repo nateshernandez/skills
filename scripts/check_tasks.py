@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Check specs/<id>/tasks.json against its spec (see skills/build/references/artifacts.md).
+"""Check specs/<id>/tasks.json against its spec and design (skills/build/references/artifacts.md).
+
+A task covers behaviors from spec.md and invariants from design.md, when there is one.
 
 Usage: check_tasks.py SPEC_ID
 """
@@ -11,7 +13,7 @@ import sys
 from kit_config import project_root
 
 PROJECT_ROOT = project_root()
-SPEC_BEHAVIOR_RE = re.compile(r"^- \*\*(\d+\.B\d+) ", re.MULTILINE)
+SPEC_BEHAVIOR_RE = re.compile(r"^- \*\*(\d+\.[BI]\d+) ", re.MULTILINE)
 TASK_ID_RE = re.compile(r"[TF]\d+")
 COMMIT_SHA_RE = re.compile(r"[0-9a-f]{7,40}")
 MAX_PLANNED_TASKS = 8
@@ -27,7 +29,9 @@ def main() -> int:
     if not tasks_path.exists():
         print(f"specs/{sys.argv[1]}/tasks.json doesn't exist", file=sys.stderr)
         return 1
-    spec_ids = SPEC_BEHAVIOR_RE.findall((spec_dir / "spec.md").read_text())
+    design_path = spec_dir / "design.md"
+    design_text = design_path.read_text() if design_path.exists() else ""
+    spec_ids = SPEC_BEHAVIOR_RE.findall((spec_dir / "spec.md").read_text() + design_text)
     problems = task_problems(json.loads(tasks_path.read_text()), spec_dir.name, spec_ids)
     if problems:
         print(f"specs/{sys.argv[1]}/tasks.json: {len(problems)} problem(s)", file=sys.stderr)

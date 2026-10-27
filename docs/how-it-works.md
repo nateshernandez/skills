@@ -47,6 +47,15 @@ IDs are permanent once you approve. Tests, tasks, findings, and the report all c
 
 Limits keep specs reviewable: 50 lines, 5 decisions, 12 behaviors. A bigger feature becomes two specs.
 
+## A complex feature gets a design
+
+When a spec fixes a shape that is costly to change, such as a data model with versioning or a protocol between agents, the designer writes `specs/<id>/design.md` after you approve the spec and before the plan. It holds types, interfaces, mermaid flows, and numbered invariants (`5.I2 Version numbers → count up by one per document with no gaps`), in 80 lines or fewer. You approve it, because it's the part you can't cheaply change later.
+
+- Each invariant gets a unit test, and `check_coverage.py` fails one without
+- The planner cuts tasks along the design's interfaces, so tasks can be built side by side
+- The code reviewer blocks a diff that drifts from the interfaces or breaks an invariant
+- After review, the shapes later specs build on move to `docs/architecture/<topic>.md`
+
 ## Gates decide when a task is done
 
 The builder never marks its own task done. `mark_task.py` runs the **task gate** and flips `passes` only when it's green:
@@ -75,7 +84,8 @@ Each agent's frontmatter lists the files it may write (`fence-allow`) or may not
 | --- | --- | --- |
 | market-researcher | `docs/product/research/market.md` | the idea, the web, Reddit through Arctic Shift |
 | product-reviewer | product review findings | brief, market research, the web |
-| planner | `plan.md`, `tasks.json` | spec, code, decisions |
+| designer | `design.md` | spec, code, architecture docs, decisions |
+| planner | `plan.md`, `tasks.json` | spec, design, code, decisions |
 | test-author | behavior tests (end to end and unit level), shared test helpers | spec, plan's tests and routes |
 | builder | app code, colocated unit tests, shared test helpers; not specs, tasks, behavior tests, probes, reviews, or `.claude/` | spec, plan, progress, tests |
 | verifier | quality probes, quality findings, screens | the spec only |
@@ -124,7 +134,7 @@ A build commits the spec, the acceptance tests, each task, each review round's f
 | Hook | Script | What it does |
 | --- | --- | --- |
 | Before a write | `fence.py` | Blocks a subagent's write outside its fence |
-| After a write | `on_write.py` | Formats and lints source files; lints specs, findings, reports, probes, product files, deck files, decisions, skills, rules, agents, and the `.claude/` changelog; checks CSS files' colours when the config has `design`, and each file's place and length when it has `architecture` |
+| After a write | `on_write.py` | Formats and lints source files; lints specs, designs, findings, reports, probes, product files, deck files, decisions, skills, rules, agents, and the `.claude/` changelog; checks CSS files' colours when the config has `design`, and each file's place and length when it has `architecture` |
 | When a subagent stops | `gate.py --hook` | Sends kit's builder back to work while the task gate is red |
 | When a subagent stops | `lint_product.py --hook` | Sends the market researcher or product reviewer back while its file fails the lint |
 

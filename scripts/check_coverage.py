@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Check that a spec's behavior tests cover every behavior once, at a deliberate level.
+"""Check that a spec's tests cover every behavior and invariant once, at a deliberate level.
 
 Usage: check_coverage.py SPEC_ID   (e.g. 001-track)
 Behavior tests live in `tests.acceptance` (end to end) and, when the config has `tests.unit`, in
 `tests.unit.acceptance` (unit level). Titles start with the behavior ID:
 test("1.B1 Visitor submits a valid email", ...).
 
-Each behavior has exactly one test across both files. With `tests.unit`, each end-to-end test
-carries a `// e2e: <why a unit test can't prove it>` line just above, and a spec may have at most
-`tests.e2e_per_spec` of them.
+Each behavior, and each invariant in design.md (`1.I1`), has exactly one test across both files.
+With `tests.unit`, each end-to-end test carries a `// e2e: <why a unit test can't prove it>` line
+just above, and a spec may have at most `tests.e2e_per_spec` of them.
 """
 
 import re
@@ -18,8 +18,8 @@ from typing import NamedTuple
 
 from kit_config import Config, ConfigError, load, relative
 
-SPEC_BEHAVIOR_RE = re.compile(r"^- \*\*(\d+\.B\d+) ", re.MULTILINE)
-TEST_TITLE_RE = re.compile(r"\b(?:test|it)\(\s*[\"'`](\d+\.B\d+)\b")
+SPEC_BEHAVIOR_RE = re.compile(r"^- \*\*(\d+\.[BI]\d+) ", re.MULTILINE)
+TEST_TITLE_RE = re.compile(r"\b(?:test|it)\(\s*[\"'`](\d+\.[BI]\d+)\b")
 DISABLED_TEST_RE = re.compile(r"\b(?:test|it|describe)\.(skip|fixme|only|fail|todo)\(")
 E2E_REASON_RE = re.compile(r"^\s*//\s*e2e:\s*\S")
 REASON_SEARCH_LINES = 3
@@ -46,8 +46,12 @@ def main() -> int:
         expected = relative(config.acceptance_path(spec_id), config.root)
         print(f"{expected} doesn't exist; write one test per behavior", file=sys.stderr)
         return 1
-    spec_text = (config.specs_dir / spec_id / "spec.md").read_text()
-    problems = coverage_problems(config, spec_id, SPEC_BEHAVIOR_RE.findall(spec_text), test_paths)
+    spec_dir = config.specs_dir / spec_id
+    design_path = spec_dir / "design.md"
+    spec_text = (spec_dir / "spec.md").read_text()
+    design_text = design_path.read_text() if design_path.exists() else ""
+    tested_ids = SPEC_BEHAVIOR_RE.findall(spec_text + design_text)
+    problems = coverage_problems(config, spec_id, tested_ids, test_paths)
     names = ", ".join(relative(path, config.root) for path in test_paths)
     if problems:
         print(f"{names}: {len(problems)} problem(s)", file=sys.stderr)

@@ -5,6 +5,7 @@ Usage: on_write.py   (reads the hook JSON on stdin; registered in hooks/hooks.js
 
 Does nothing in a project without .claude/kit/config.json. Otherwise, by what was written:
   specs/<id>/spec.md                            lint_spec.py
+  specs/<id>/design.md                          lint_design.py
   specs/<id>/reviews/*.md, report.md, a probe   lint_outputs.py
   docs/decisions/*.md                           lint_decision.py
   docs/product/ brief, market, reviews          lint_product.py
@@ -34,6 +35,7 @@ import lint_agent
 import lint_changelog
 import lint_decision
 import lint_deck
+import lint_design
 import lint_outputs
 import lint_product
 import lint_rule
@@ -46,6 +48,7 @@ Linter = Callable[[Path, Config], list[str]]
 PLUGIN_ROOT = Path(__file__).resolve().parents[1]
 FORMAT_GUIDES = {
     "spec": "skills/write-spec/references/format.md",
+    "design": "skills/design-spec/references/design-format.md",
     "outputs": "skills/build/references/artifacts.md",
     "decision": "skills/write-decision/references/format.md",
     "product": "skills/define-product/references/brief-format.md",
@@ -101,6 +104,7 @@ def kit_file_kinds(path: Path, config: Config) -> dict[str, bool]:
     is_markdown = path.suffix == ".md"
     return {
         "spec": path.name == "spec.md" and path.parent.parent == config.specs_dir,
+        "design": lint_design.is_design_file(path, config.specs_dir),
         "outputs": lint_outputs.is_build_output(path, config),
         "decision": is_markdown and path.parent == config.decisions_dir,
         "product": lint_product.is_product_file(path, config.root),
@@ -193,6 +197,7 @@ def ignoring_config(lint: Callable[[Path], list[str]]) -> Linter:
 
 LINTERS: dict[str, Linter] = {
     "spec": ignoring_config(lint_spec.lint),
+    "design": ignoring_config(lint_design.lint),
     "outputs": lint_build_output,
     "decision": ignoring_config(lint_decision.lint),
     "product": ignoring_config(lint_product.lint),
