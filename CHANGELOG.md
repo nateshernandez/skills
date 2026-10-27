@@ -2,6 +2,10 @@
 
 What each release of kit changes for the people using it. Newest first.
 
+## 0.7.0 (2026-10-27)
+
+- **Changed** `/kit:build`: before the full gate, the probes that found a defect become unit tests beside their code and the probe files are deleted, so you no longer have to ask for it; a probe only a real browser can prove stays and is listed in the report
+
 ## 0.6.0 (2026-10-27)
 
 - **Added** `tests.unit`, `tests.support`, and `tests.e2e_per_spec` in the config: the planner gives each behavior a unit, component, or end-to-end level, unit-level tests run in every task gate, and `check_coverage.py` fails an end-to-end test with no `// e2e:` reason or a spec past its budget of 4
