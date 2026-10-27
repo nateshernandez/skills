@@ -110,7 +110,7 @@ Fences apply once `.claude/kit/config.json` exists, so a product brief written b
 
 Each reviewer writes `specs/<id>/reviews/<lens>-r<round>.md`. Every finding is a `blocker` or a `note`, and each one carries exactly one piece of evidence: a failing probe, a screenshot, command output, or a `file:line`. Blockers become fix tasks (`F1`, `F2`, ...) for the next round. After three rounds with blockers left, the spec is marked `blocked`, and the report asks you one question per blocker.
 
-A probe is a question, not a test to keep: one that passes is deleted. A probe that fails stays, because the fix task and every later gate need it, so the suite grows only with defects found.
+A probe is a question, not a test to keep: one that passes is deleted. A probe that fails stays while its fix is built, because the fix task and the gates need it. When the last round has no blockers, a final task turns each kept probe into a unit test beside its code and the probe files are deleted, so the suite grows only with defects found and the probes folder ends empty. A probe that needs a real browser stays and is listed in the report.
 
 ## Turbo builds trade review for speed
 

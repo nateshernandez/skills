@@ -16,7 +16,8 @@ Everything a build leaves behind lives in `specs/<id>/`. Only `spec.md` and `rep
   - Each behavior has one test at one level; plan.md's Tests section names it, and `check_coverage.py` holds to it
   - Helpers two test files share live in `tests.support`; `check_tests.py` fails a copy
 - Probe titles start with `<n>.B<k>` (a behavior) or `<n>.outcome` (the whole-feature check, `<n>.outcome probe: ...`)
-  - A probe is scratch: one that passes is deleted, so the file holds only probes that found a defect
+  - A probe is scratch: one that passes is deleted, so the file holds only probes that found a defect, until they are promoted to unit tests (below)
+  - At the end of the build the kept probes are promoted to unit tests and the probe files deleted (SKILL.md); a finding that quoted a probe then cites the unit test's `file:line`
   - Kept probes don't print (`console.log`); `lint_outputs.py` checks both when a probe is written
   - The task gate skips `<n>.outcome` probes; the full gate runs them
 
@@ -35,6 +36,14 @@ Everything a build leaves behind lives in `specs/<id>/`. Only `spec.md` and `rep
 - Reviewers never start, stop, or rebuild the app; the builder's gate already built it
 - The app doesn't answer → report "review app broken" and stop
 - Reviewers never run the gate or the full `check`; the builder's gate already did
+
+## Promoting probes
+
+A probe that found a defect is a permanent test. Once no blockers are left and probe files remain, before the full gate:
+
+- Add one `F<n>` task, "Promote probes to unit tests", with empty `covers`; the builder writes each probe's check as a colocated unit test, moving the rule into a pure function when the code ties it to the DOM
+- When it passes, delete the probe files, point each finding's Evidence at the unit test's `file:line`, and commit
+- A probe only a real browser can prove stays, and the report's Open notes list it
 
 ## tasks.json
 
@@ -89,7 +98,7 @@ verdict: fail
 - Caps the lint enforces: 25 words per finding, 15 findings per file
 - `verdict: fail` exactly when there is a blocker
 - Each finding has exactly one Evidence: a screenshot, failing test, command output, or `file:line`
-- A probe quoted in Evidence is the test title exactly (it may end in `...`); the lint checks it against the spec's probe files
+- A probe quoted in Evidence is the test title exactly (it may end in `...`); the lint checks it against the spec's probe files, so promoted probes are cited by the unit test's `file:line`, so once the probes are promoted the Evidence is the unit test's `file:line`
 - No findings → the list is the single line `none`
 
 ## Codify

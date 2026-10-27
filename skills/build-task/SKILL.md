@@ -41,7 +41,7 @@ flowchart TD
   - _Because:_ a fresh look beats a fourth guess in the same context
 - **Building UI** → follow the design guide `design.guide` names in the config: the screen's layout, its patterns, components, and tokens
   - _Because:_ one design system keeps screens consistent, and the UX reviewer judges against the guide
-- **Writing a unit test** → colocate it with its code; import shared setup from `tests.support`, never copy it
+- **Writing a unit test, or promoting a probe to one** → colocate it, in a pure function if the DOM ties the rule; share setup from `tests.support`
   - _Because:_ `check_tests.py` fails a helper declared twice, and a copy is a second place to fix
 - **Adding to `tests.support`** → only a helper at least two test files use; never change one that exists
   - _Because:_ a changed helper can weaken every test that imports it
