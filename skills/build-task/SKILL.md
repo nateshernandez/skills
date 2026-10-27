@@ -33,12 +33,16 @@ flowchart TD
 
 ## Rules
 
-- **A locked file looks wrong (spec, acceptance tests, probes, tasks)** → log `blocked:` with the reason; stop
+- **A locked file looks wrong (spec, behavior tests, probes, tasks)** → log `blocked:` with the reason; stop
   - _Because:_ the orchestrator fixes plans; editing a check to pass it is cheating
 - **The same failure survives 3 attempts** → log `blocked:` with the error; stop
   - _Because:_ a fresh look beats a fourth guess in the same context
 - **Building UI** → follow the design guide `design.guide` names in the config: the screen's layout, its patterns, components, and tokens
   - _Because:_ one design system keeps screens consistent, and the UX reviewer judges against the guide
+- **Writing a unit test** → colocate it with its code; import shared setup from `tests.support`, never copy it
+  - _Because:_ `check_tests.py` fails a helper declared twice, and a copy is a second place to fix
+- **Adding to `tests.support`** → only a helper at least two test files use; never change one that exists
+  - _Because:_ a changed helper can weaken every test that imports it
 - **Creating a file** → place it by the architecture guide `architecture.guide` names in the config
   - _Because:_ its question tree gives every file one home; lint and `check_shape.py` fail the others
 - **Tempted to write a decision record or rule** → note the pattern in progress.md; the orchestrator codifies after review
@@ -66,7 +70,7 @@ flowchart TD
 
 ## Never
 
-- Editing spec.md, tasks.json, acceptance tests, or probes
+- Editing spec.md, tasks.json, behavior tests (end-to-end or unit level), or probes
 - Special-casing test inputs, or type and lint suppressions to go green
 - Pushing
 

@@ -43,11 +43,18 @@ The builder never marks its own task done. `mark_task.py` runs the **task gate**
 1. Your `check` command
 2. `check_tokens.py`, when the config has `design`: token contrast in each theme the app ships, and no colour outside the tokens file
 3. `check_shape.py`, when the config has `architecture`: each module's files in their places, and no source file past the line cap
-4. The spec's acceptance tests and probes, minus behaviors that later tasks will build, and minus the whole-feature `outcome` probes
+4. `check_tests.py`, when the config has `tests.support`: no helper copied between test files
+5. The spec's behavior tests (unit level first, then end to end) and probes, minus behaviors that later tasks will build, and minus the whole-feature `outcome` probes
 
-The **full gate** runs once per spec, after the last review round: `check_full`, `check_tokens.py`, `check_shape.py`, then every delivered behavior's tests and the outcome probes.
+The **full gate** runs once per spec, after the last review round: `check_full`, the same checks, then every delivered behavior's tests and the outcome probes.
 
 Both gates log to a temp file and print only the failing test titles and the log's tail. A green run stamps the working tree, so rerunning on an unchanged tree returns at once. When a builder tries to stop with a red gate, the stop hook sends it back, at most three times in a row.
+
+## Each behavior is tested at the cheapest level
+
+The planner gives every behavior a level in plan.md: unit, component, or end to end. Rules (what's allowed, how much, what text results) are unit tests, which run in every task gate in seconds. A behavior that needs a real browser, a journey where a miss costs most, or the layers wired together is end to end, with a `// e2e: <reason>` above its test. A spec may have only `tests.e2e_per_spec` of those, so the slow suite grows by decision, not by default.
+
+Test files share helpers through `tests.support`. `check_tests.py` fails a helper copied into two files, and the test author, verifier, and builder read the support folder before writing their own.
 
 ## Agents can only write their own files
 
@@ -58,8 +65,8 @@ Each agent's frontmatter lists the files it may write (`fence-allow`) or may not
 | market-researcher | `docs/product/market.md` | the idea, the web, Reddit through Arctic Shift |
 | product-reviewer | product review findings | brief, market research, the web |
 | planner | `plan.md`, `tasks.json` | spec, code, decisions |
-| test-author | acceptance tests | spec, plan's routes |
-| builder | app code and unit tests; not specs, tasks, tests, probes, reviews, or `.claude/` | spec, plan, progress, tests |
+| test-author | behavior tests (end to end and unit level), shared test helpers | spec, plan's tests and routes |
+| builder | app code, colocated unit tests, shared test helpers; not specs, tasks, behavior tests, probes, reviews, or `.claude/` | spec, plan, progress, tests |
 | verifier | quality probes, quality findings, screens | the spec only |
 | code-reviewer | code findings | the diff, rules, decisions |
 | security-reviewer | security probes, security findings | the diff, plan's risks |
@@ -73,7 +80,7 @@ Fences apply once `.claude/kit/config.json` exists, so a product brief written b
 
 Each reviewer writes `specs/<id>/reviews/<lens>-r<round>.md`. Every finding is a `blocker` or a `note`, and each one carries exactly one piece of evidence: a failing probe, a screenshot, command output, or a `file:line`. Blockers become fix tasks (`F1`, `F2`, ...) for the next round. After three rounds with blockers left, the spec is marked `blocked`, and the report asks you one question per blocker.
 
-Probes that pass are kept, so every later gate also runs them as regression tests.
+A probe is a question, not a test to keep: one that passes is deleted. A probe that fails stays, because the fix task and every later gate need it, so the suite grows only with defects found.
 
 ## Turbo builds trade review for speed
 

@@ -11,9 +11,14 @@ Every command runs from the project root through your shell. Unknown fields are 
 | `check` | yes | The fast gate every task must pass: format check, lint, types, unit tests, build |
 | `check_full` | yes | Everything, run once per spec after the last review round: `check` plus e2e, visual, and other slow suites |
 | `tests.runner` | yes | `playwright`, `vitest`, or `jest`; picks the test style agents write and how failures are read |
-| `tests.acceptance` | yes | Where a spec's acceptance tests go; must contain `{spec}` |
+| `tests.acceptance` | yes | Where a spec's end-to-end acceptance tests go; must contain `{spec}` |
 | `tests.probes` | yes | Where reviewers' probes go; must contain `{spec}` and `{lens}` |
 | `tests.run` | yes | How to run some test files, filtered by title; must contain `{files}` and `{grep}` |
+| `tests.unit.runner` | with `tests.unit` | `vitest` or `jest`; the runner for unit-level behavior tests |
+| `tests.unit.acceptance` | with `tests.unit` | Where a spec's unit-level behavior tests go; must contain `{spec}`, such as `tests/unit/{spec}.test.ts` |
+| `tests.unit.run` | with `tests.unit` | How to run those files, filtered by title; must contain `{files}` and `{grep}` |
+| `tests.support` | no | The folder for helpers shared by test files, such as `tests/support`; turns on `check_tests.py` |
+| `tests.e2e_per_spec` | no | The most behaviors a spec may test end to end; 4 when left out. Only checked with `tests.unit` |
 | `app.serve` | no | Starts the app reviewers share during a round; runs in the background until stopped |
 | `app.url` | with `app` | Where the app answers; kit waits for it before reviewers start |
 | `app.env` | no | Environment variables for reviewers' test runs, such as `{"REUSE_SERVER": "1"}` |
@@ -36,6 +41,37 @@ Every command runs from the project root through your shell. Unknown fields are 
 | `architecture.baseline` | no | Where `check_shape.py --write-baseline` records an existing app's files, such as `.claude/kit/architecture-baseline.json` |
 | `build.mode` | no | `standard` (the default) or `turbo`; how `/kit:build` runs a spec that doesn't name its own mode |
 | `build.turbo_model` | no | Model for a turbo build's test author, builders, and verifier, such as `sonnet`; unset, they use the session's model |
+
+## Test levels
+
+Every gate runs the tests, so a behavior gets the cheapest test that can fail when it breaks. With `tests.unit` set, the planner gives each behavior a level in plan.md's Tests section and the test author writes it there:
+
+- **Unit and component** → `tests.unit.acceptance`, run by the unit runner; fast enough to run in every task gate
+- **End to end** → `tests.acceptance`, run by the browser runner; each test carries a `// e2e: <reason>` line, and a spec has at most `tests.e2e_per_spec` of them
+
+`check_coverage.py` holds to this: one test per behavior across both files, a reason on every end-to-end test, and the budget. A UI-heavy spec that needs more end-to-end tests gets the budget raised in the config by you, not by an agent.
+
+- **Probes are scratch.** The verifier and reviewers delete a probe that passes; the file keeps only the probes that found a defect, so the suite doesn't grow with every review.
+- **Helpers are shared.** With `tests.support`, `check_tests.py` runs in every task gate and on each test file an agent writes. It fails a top-level helper of four lines or more declared in two test files, or already in the support folder.
+- **Without `tests.unit`** every behavior is tested end to end as before, and neither the reasons nor the budget are checked.
+
+```json
+"tests": {
+  "runner": "playwright",
+  "acceptance": "tests/acceptance/{spec}.spec.ts",
+  "probes": "tests/probes/{spec}-{lens}.spec.ts",
+  "run": "pnpm exec playwright test {files} --grep {grep}",
+  "unit": {
+    "runner": "vitest",
+    "acceptance": "tests/unit/{spec}.test.ts",
+    "run": "pnpm exec vitest run {files} -t {grep}"
+  },
+  "support": "tests/support",
+  "e2e_per_spec": 4
+}
+```
+
+Put the unit runner in `check` so the task gate runs every unit test, and keep the whole end-to-end suite in `check_full` or CI, sharded.
 
 ## Design
 
@@ -149,7 +185,7 @@ kit fills these in and shell-quotes each value, so don't add quotes around them.
 | --- | --- | --- |
 | `{spec}` | `tests.acceptance`, `tests.probes` | The spec ID, like `001-waitlist` |
 | `{lens}` | `tests.probes` | `quality`, `ux`, `security`, or `code` |
-| `{files}` | `tests.run` | The spec's acceptance test file and probe files |
+| `{files}` | `tests.run`, `tests.unit.run` | The spec's test files for that runner: end to end plus probes, or unit level |
 | `{grep}` | `tests.run` | A title regex that leaves out behaviors still being built, or `^` to run everything |
 | `{file}` | `format.run`, `lint.run` | The absolute path of the file just written |
 

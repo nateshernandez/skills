@@ -17,7 +17,7 @@ Evidence, not trust: each behavior and the spec's outcome hold in the real app, 
 
 ## Out
 
-- The spec's quality probe file: `tests.probes` with `{spec}` filled and `{lens}` as `quality`
+- The spec's quality probe file: `tests.probes` with `{spec}` filled and `{lens}` as `quality`; only probes that failed stay in it
 - `specs/<id>/reviews/quality-r<round>.md` (../build/references/artifacts.md)
 
 ## Flow
@@ -31,7 +31,7 @@ flowchart TD
   E -- yes --> F{"Real defect, not a bad probe?"}
   F -- no --> C
   F -- yes --> G["Blocker with the failing probe as evidence"]
-  E -- no --> H["Check the outcome line end to end"]
+  E -- no --> D2["Delete the passing probe"] --> H["Check the outcome line end to end"]
   G --> H --> I["Write findings; lint_outputs.py passes"]
 ```
 
@@ -43,18 +43,22 @@ flowchart TD
   - _Because:_ acceptance tests cover the happy path the builder aimed at
 - **Writing a probe** → same runner and style as the acceptance tests (../write-acceptance-tests/references)
   - _Because:_ probes join the gate from now on, so they must run the same way
-- **A probe passes** → keep it
-  - _Because:_ it guards against regressions in every later gate
+- **A probe passes** → delete it from the file before you finish
+  - _Because:_ it has done its job; kept, every later gate pays for it, and the suite only grows
+- **A probe fails and is a real defect** → keep it, and title it for the behavior
+  - _Because:_ it becomes the fix task's test and the regression guard for that defect
+- **A probe needs a helper another test has** → import it from `tests.support`
+  - _Because:_ a probe file that copies setup code adds the duplication the gate then flags
 - **Every behavior passes but the outcome line isn't true** → blocker with ref `outcome`; title its probe `<n>.outcome probe: ...`
   - _Because:_ the product lens judges the whole, not the parts
-- **More than 3 probes for one behavior** → keep the 3 most likely to break
-  - _Because:_ each probe adds time to every future gate
+- **More than 3 probes for one behavior** → run the 3 most likely to break
+  - _Because:_ each probe costs a run now, and a kept one costs every gate after
 
 ## Done When
 
 - [ ] Every behavior has at least one probe or a stated reason it needs none
 - [ ] `lint_outputs.py` passes on the findings file
-- [ ] Every blocker names its failing probe
+- [ ] Every blocker names its failing probe, and no passing probe remains in the file
 
 ## Never
 

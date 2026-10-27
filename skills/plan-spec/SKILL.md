@@ -38,6 +38,8 @@ flowchart TD
   - _Because:_ the builder runs once per task with fresh context
 - **Ordering tasks** → vertical slices that each leave a working feature, not layers
   - _Because:_ acceptance tests can then pass task by task
+- **Every behavior** → in Tests, give it a level and its test file: unit, component, or e2e with a reason (../write-acceptance-tests/references/levels.md)
+  - _Because:_ the level is decided once, here, and the test author and `check_coverage.py` hold to it
 - **A risk or gap the spec doesn't cover** → list it under Flags; leave spec.md alone
   - _Because:_ the spec is approved; the orchestrator or requester decides
 - **The plan makes or must follow an architecture choice** → list it under Decisions
@@ -56,7 +58,7 @@ flowchart TD
 ## Done When
 
 - [ ] `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check_tasks.py <id>` passes
-- [ ] plan.md is ≤ 40 non-blank lines
+- [ ] plan.md is ≤ 50 non-blank lines, and its e2e rows fit `tests.e2e_per_spec`
 - [ ] Every risk maps to a behavior or a Flag
 
 ## Never
@@ -66,6 +68,6 @@ flowchart TD
 
 ## More
 
-- [references/plan-format.md](references/plan-format.md): plan sections and a threat checklist
+- [references/plan-format.md](references/plan-format.md): plan sections, test levels, and a threat checklist
 - [../../scripts/check_tasks.py](../../scripts/check_tasks.py): task list checks against the spec
 - [../build/references/artifacts.md](../build/references/artifacts.md): task list shape

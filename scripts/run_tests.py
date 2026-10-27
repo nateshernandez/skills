@@ -2,7 +2,8 @@
 """Run one spec's tests the way reviewers do: every test, against the review app when there is one.
 
 Usage: run_tests.py SPEC_ID [FILE ...]
-  No files: the spec's acceptance tests and probes. Nothing is skipped, and nothing is stamped.
+  No files: the spec's behavior tests (end-to-end and unit level) and probes. Nothing is
+  skipped, and nothing is stamped.
   When the config has an `app`, its `env` is set and KIT_APP_URL holds its url.
 Prints `pass`, or the failing test titles and the log's last lines; exit 1 when a test fails.
 """
@@ -10,8 +11,8 @@ Prints `pass`, or the failing test titles and the log's last lines; exit 1 when 
 import os
 import sys
 
-from gate import GateStep, format_failure, run_steps, spec_test_files, temp_path
-from kit_config import ConfigError, fill, load
+from gate import format_failure, run_steps, spec_test_files, temp_path, test_steps
+from kit_config import ConfigError, load
 
 
 def main() -> int:
@@ -34,9 +35,9 @@ def main() -> int:
         return 1
     if config.app is not None:
         os.environ.update({**config.app.env, "KIT_APP_URL": config.app.url})
-    step = GateStep(f"{spec_id} tests", fill(config.tests.run, files=test_files, grep="^"))
+    steps = test_steps(config, spec_id, test_files, "^")
     log_path = temp_path(config, f"tests-{spec_id}-{os.getpid()}.log")
-    result = run_steps(config, [step], log_path)
+    result = run_steps(config, steps, log_path)
     if result.is_green:
         print(f"pass: {' '.join(test_files)}")
         return 0
