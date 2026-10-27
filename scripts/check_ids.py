@@ -3,7 +3,8 @@
 
 Usage: check_ids.py SPEC_ID   (e.g. 001-track)
 
-IDs look like `1.B4`: spec number, then D (decision) or B (behavior) and an index.
+IDs look like `1.B4`: spec number, then D (decision), B (behavior), or I (an invariant in
+design.md) and an index.
 Live files (tasks, tests, probes, plan, report) may cite only active IDs.
 History files (progress.md, reviews) may also cite retired ones.
 IDs from other specs are allowed everywhere.
@@ -16,8 +17,8 @@ from typing import NamedTuple
 
 from kit_config import Config, ConfigError, load, project_root, relative
 
-ITEM_ID_RE = re.compile(r"(?<![\d.])(\d+)\.([DB])(\d+)\b")
-SPEC_ITEM_RE = re.compile(r"^- \*\*(\d+\.[DB]\d+) ", re.MULTILINE)
+ITEM_ID_RE = re.compile(r"(?<![\d.])(\d+)\.([DBI])(\d+)\b")
+SPEC_ITEM_RE = re.compile(r"^- \*\*(\d+\.[DBI]\d+) ", re.MULTILINE)
 RETIRED_FIELD_RE = re.compile(r"^retired:\s*(.*)$", re.MULTILINE)
 
 
@@ -58,9 +59,11 @@ def load_spec_ids(spec_dir: Path) -> SpecIds:
     spec_text = (spec_dir / "spec.md").read_text()
     retired_match = RETIRED_FIELD_RE.search(spec_text.split("\n---", 1)[0])
     retired_text = retired_match.group(1) if retired_match else ""
+    design_path = spec_dir / "design.md"
+    design_text = design_path.read_text() if design_path.exists() else ""
     return SpecIds(
         spec_number=int(spec_dir.name.split("-", 1)[0]),
-        active=frozenset(SPEC_ITEM_RE.findall(spec_text)),
+        active=frozenset(SPEC_ITEM_RE.findall(spec_text + design_text)),
         retired=frozenset(find_ids(retired_text)),
     )
 
@@ -73,6 +76,7 @@ def live_files(spec_dir: Path, config: Config) -> list[Path]:
     spec_id = spec_dir.name
     candidates = [
         spec_dir / "tasks.json",
+        spec_dir / "design.md",
         spec_dir / "plan.md",
         spec_dir / "report.md",
         *config.behavior_test_paths(spec_id),

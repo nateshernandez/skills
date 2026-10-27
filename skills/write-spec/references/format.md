@@ -49,6 +49,7 @@ A spec is the contract between the requester and the build team. The requester a
 - **Design** → Looks like; each screen's states (empty, loading, error, success) and its longest real content
 - **UX** → error recovery, keyboard use and where focus goes after each action, phone width, copy the user reads
 - **Tech** → decisions the stack forces (storage, server vs client)
+  - A new data model, protocol, state machine, or contract is designed after approval in `design.md` (design-spec), not in the spec
 - **Quality** → every outcome is observable, so a test can check it
 - **Security** → input, auth, abuse, data exposure; each risk becomes a behavior
 - A lens that changes nothing leaves no trace in the spec

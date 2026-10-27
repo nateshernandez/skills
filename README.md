@@ -59,8 +59,8 @@ flowchart LR
 ```
 
 1. **Spec.** `specs/001-waitlist/spec.md`: an outcome line, decisions (`1.D1`), behaviors (`1.B1`), and what's out of scope. UI features also get a static prototype and screenshots.
-2. **Plan.** A planner writes `plan.md` and `tasks.json`: vertical slices, each of which leaves the app working.
-3. **Tests.** A test author writes one acceptance test per behavior from the spec alone, and confirms each one fails.
+2. **Design and plan.** When the spec fixes a data model, protocol, state machine, or contract, a designer writes `design.md` first and you approve it. A planner then writes `plan.md` and `tasks.json`: vertical slices, each of which leaves the app working.
+3. **Tests.** A test author writes one test per behavior, at the cheapest level that proves it (unit unless a browser is the point), and confirms each one fails.
 4. **Build.** One builder per task, each with fresh context. `mark_task.py` runs the gate and marks the task done only when it's green.
 5. **Review.** A verifier, plus code, security, and UX reviewers as the change calls for, each write findings with evidence. Blockers become fix tasks, for up to three rounds.
 6. **Report.** `report.md` marks each behavior ✓ or ✗ and lists what was decided without you, what was codified, and how to try it.
@@ -142,7 +142,7 @@ Run `/kit:define-deck-style` once to set the house look from your brand files in
 | `/kit:write-agent` | Writes a subagent, with write fences |
 | `/kit:write-changelog-entry` | Logs a change to your project's `.claude/` setup |
 
-The agents run the rest of the skills: `research-market`, `review-product`, `plan-spec`, `write-acceptance-tests`, `build-task`, `verify-spec`, `review-code`, `review-security`, `review-ux`, `build-slides`, and `review-deck`.
+The agents run the rest of the skills: `research-market`, `review-product`, `design-spec`, `plan-spec`, `write-acceptance-tests`, `build-task`, `verify-spec`, `review-code`, `review-security`, `review-ux`, `build-slides`, and `review-deck`.
 
 ## What kit adds to your project
 
