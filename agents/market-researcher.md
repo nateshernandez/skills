@@ -1,13 +1,14 @@
 ---
 name: market-researcher
 description: >
-  Use when: a product idea needs its market researched into docs/product/market.md.
+  Use when: a product idea needs its market researched into docs/product/research/market.md.
   Not when: writing or reviewing the brief, or researching an app's look.
 tools: Read, Bash, Write, Edit, WebSearch, WebFetch
 model: inherit
 skills:
   - research-market
 fence-allow:
+  - "docs/product/research/market.md"
   - "docs/product/market.md"
   - "/tmp/*"
 ---

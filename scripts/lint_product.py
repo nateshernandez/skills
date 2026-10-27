@@ -2,8 +2,9 @@
 """Lint the product files define-product writes in docs/product/.
 
 Usage:
-  lint_product.py [PATH ...]   lint brief.md, market.md, or reviews/product-r<n>.md; with no
-                               PATH, every product file in this project; exit 1 on problems
+  lint_product.py [PATH ...]   lint brief.md, research/market.md, or
+                               research/reviews/product-r<n>.md; with no PATH, every product
+                               file in this project; exit 1 on problems
   lint_product.py --hook       SubagentStop hook: lint the market researcher's market.md or the
                                product reviewer's latest review; exit 2 (keep working) on
                                problems, at most 3 times in a row; silent without kit's config
@@ -27,6 +28,7 @@ from lint_spec import committed_text, lint_banned_shapes, parse_fields, split_fr
 
 PRODUCT_PATH = Path("docs") / "product"
 BRIEF_NAME = "brief.md"
+RESEARCH_NAME = "research"
 MARKET_NAME = "market.md"
 REVIEWS_NAME = "reviews"
 RESEARCHER_AGENT = "kit:market-researcher"
@@ -182,14 +184,27 @@ def run_hook(hook_input: dict) -> int:
 
 def agent_output_path(agent_type: str, product_dir: Path) -> Path:
     if agent_type == RESEARCHER_AGENT:
-        return product_dir / MARKET_NAME
+        return market_path(product_dir)
     review_rounds = {
         int(name_match.group("round")): path
-        for path in (product_dir / REVIEWS_NAME).glob("product-r*.md")
+        for path in reviews_dir(product_dir).glob("product-r*.md")
         if (name_match := REVIEW_NAME_RE.match(path.name))
     }
     latest_round = max(review_rounds, default=1)
-    return review_rounds.get(latest_round, product_dir / REVIEWS_NAME / "product-r1.md")
+    return review_rounds.get(latest_round, reviews_dir(product_dir) / "product-r1.md")
+
+
+def market_path(product_dir: Path) -> Path:
+    """`research/market.md`; a project that wrote it beside the brief keeps that location."""
+    legacy_path = product_dir / MARKET_NAME
+    research_path = product_dir / RESEARCH_NAME / MARKET_NAME
+    return legacy_path if legacy_path.exists() and not research_path.exists() else research_path
+
+
+def reviews_dir(product_dir: Path) -> Path:
+    legacy_dir = product_dir / REVIEWS_NAME
+    research_dir = product_dir / RESEARCH_NAME / REVIEWS_NAME
+    return legacy_dir if legacy_dir.exists() and not research_dir.exists() else research_dir
 
 
 def run_id(hook_input: dict) -> str:
@@ -200,8 +215,8 @@ def find_product_files(root: Path) -> list[Path]:
     product_dir = root / PRODUCT_PATH
     candidates = [
         product_dir / BRIEF_NAME,
-        product_dir / MARKET_NAME,
-        *sorted((product_dir / REVIEWS_NAME).glob("product-r*.md")),
+        market_path(product_dir),
+        *sorted(reviews_dir(product_dir).glob("product-r*.md")),
     ]
     return [path for path in candidates if path.is_file()]
 
@@ -209,9 +224,12 @@ def find_product_files(root: Path) -> list[Path]:
 def is_product_file(path: Path, root: Path) -> bool:
     product_dir = (root / PRODUCT_PATH).resolve()
     path = path.resolve()
-    is_brief_or_market = path.parent == product_dir and path.name in (BRIEF_NAME, MARKET_NAME)
-    is_review = path.parent == product_dir / REVIEWS_NAME and path.name.startswith("product-r")
-    return is_brief_or_market or is_review
+    is_brief = path == product_dir / BRIEF_NAME
+    is_market = path == market_path(product_dir).resolve()
+    is_review = path.parent == reviews_dir(product_dir).resolve() and path.name.startswith(
+        "product-r"
+    )
+    return is_brief or is_market or is_review
 
 
 def lint(product_path: Path) -> list[str]:
@@ -222,10 +240,11 @@ def lint(product_path: Path) -> list[str]:
     if product_path.name == MARKET_NAME:
         return lint_market(text)
     if product_path.name == BRIEF_NAME:
-        market_path = product_path.parent / MARKET_NAME
-        market_text = market_path.read_text() if market_path.exists() else None
+        market_file = market_path(product_path.parent)
+        market_text = market_file.read_text() if market_file.exists() else None
         return lint_brief(text, market_text, committed_text(product_path))
-    return [f"not a product file: expected {BRIEF_NAME}, {MARKET_NAME}, or reviews/product-r<n>.md"]
+    expected = f"{BRIEF_NAME}, research/{MARKET_NAME}, or research/reviews/product-r<n>.md"
+    return [f"not a product file: expected {expected}"]
 
 
 def lint_brief(brief_text: str, market_text: str | None, approved_text: str | None) -> list[str]:

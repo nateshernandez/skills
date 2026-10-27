@@ -1,9 +1,9 @@
-// Architecture lint from docs/architecture.md: where code lives and which way imports flow.
+// Architecture lint from docs/architecture/guide.md: where code lives and which way imports flow.
 // Spread `architectureBlocks` into eslint.config.mjs after eslint-config-next. Every message names
 // the fix and the guide, so an agent corrects itself on the write.
 import boundaries from 'eslint-plugin-boundaries';
 
-const GUIDE = 'docs/architecture.md';
+const GUIDE = 'docs/architecture/guide.md';
 const MODULE_FOLDERS = ['use-cases', 'domain', 'infra', 'components'];
 const MODULE_PARTS = MODULE_FOLDERS.map((folder) => `module-${folder}`);
 const MODULE_TYPES = ['module', ...MODULE_PARTS];

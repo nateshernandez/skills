@@ -1,6 +1,6 @@
 # look.md format
 
-`docs/design/look.md` records where the app's look came from: the screens it was measured from, what was measured, and the tokens proposed from them. The foundations spec's decisions cite it; the design guide takes its token values from it. Keep it ≤ 150 lines.
+`docs/design/research/look.md` records where the app's look came from: the screens it was measured from, what was measured, and the tokens proposed from them. The foundations spec's decisions cite it; the design guide takes its token values from it. Keep it ≤ 150 lines.
 
 ## Shape
 

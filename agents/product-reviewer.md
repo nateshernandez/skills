@@ -8,6 +8,7 @@ model: inherit
 skills:
   - review-product
 fence-allow:
+  - "docs/product/research/reviews/product-r*.md"
   - "docs/product/reviews/product-r*.md"
   - "/tmp/*"
 ---

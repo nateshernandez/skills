@@ -5,8 +5,8 @@
 ## Where it lives
 
 - **`docs/product/brief.md`** → the card the requester approves; copied from assets/brief-template.md
-- **`docs/product/market.md`** → the evidence: sources with links, competitors, complaints (../../research-market/references/market-format.md)
-- **`docs/product/reviews/product-r<n>.md`** → the product reviewer's findings per round (below)
+- **`docs/product/research/market.md`** → the evidence: sources with links, competitors, complaints (../../research-market/references/market-format.md)
+- **`docs/product/research/reviews/product-r<n>.md`** → the product reviewer's findings per round (below)
 - **`docs/product/validation.md`** → interview plan, smoke tests, and results (validation.md)
 
 ## Frontmatter
@@ -60,7 +60,7 @@
 
 ## Review findings
 
-`docs/product/reviews/product-r<n>.md`, linted like a build review's findings:
+`docs/product/research/reviews/product-r<n>.md`, linted like a build review's findings:
 
 ```markdown
 ---
