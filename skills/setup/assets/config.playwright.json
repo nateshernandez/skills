@@ -5,7 +5,14 @@
     "runner": "playwright",
     "acceptance": "tests/acceptance/{spec}.spec.ts",
     "probes": "tests/probes/{spec}-{lens}.spec.ts",
-    "run": "pnpm exec playwright test {files} --grep {grep}"
+    "run": "pnpm exec playwright test {files} --grep {grep}",
+    "unit": {
+      "runner": "vitest",
+      "acceptance": "tests/unit/{spec}.test.ts",
+      "run": "pnpm exec vitest run {files} -t {grep}"
+    },
+    "support": "tests/support",
+    "e2e_per_spec": 4
   },
   "app": {
     "serve": "pnpm build && pnpm start --port 3100",

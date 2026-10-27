@@ -9,6 +9,7 @@ skills:
   - review-security
 fence-allow:
   - "{probes}"
+  - "{support}"
   - "specs/*/reviews/security-r*.md"
   - "/tmp/*"
 ---

@@ -9,6 +9,7 @@ skills:
   - review-ux
 fence-allow:
   - "{probes}"
+  - "{support}"
   - "specs/*/reviews/ux-r*.md"
   - "specs/*/screens/*"
   - "/tmp/*"

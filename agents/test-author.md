@@ -9,6 +9,8 @@ skills:
   - write-acceptance-tests
 fence-allow:
   - "{acceptance}"
+  - "{unit_acceptance}"
+  - "{support}"
   - "/tmp/*"
 ---
 

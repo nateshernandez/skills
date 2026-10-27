@@ -11,8 +11,11 @@ Everything a build leaves behind lives in `specs/<id>/`. Only `spec.md` and `rep
 - **`reviews/<lens>-r<round>.md`** → findings per lens per round
 - **`report.md`** → the delivery report the requester reads
 - **`screens/`** → prototype and review screenshots
-- Acceptance tests and probes live where `.claude/kit/config.json` says: `tests.acceptance` and `tests.probes`
+- Behavior tests and probes live where `.claude/kit/config.json` says: `tests.acceptance` (end to end), `tests.unit.acceptance` (unit level, when set), and `tests.probes`
+  - Each behavior has one test at one level; plan.md's Tests section names it, and `check_coverage.py` holds to it
+  - Helpers two test files share live in `tests.support`; `check_tests.py` fails a copy
 - Probe titles start with `<n>.B<k>` (a behavior) or `<n>.outcome` (the whole-feature check, `<n>.outcome probe: ...`)
+  - A probe is scratch: one that passes is deleted, so the file holds only probes that found a defect
   - Kept probes don't print (`console.log`); `lint_outputs.py` checks both when a probe is written
   - The task gate skips `<n>.outcome` probes; the full gate runs them
 

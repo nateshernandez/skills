@@ -1,6 +1,6 @@
 # plan.md format
 
-Agent-facing: the builder and reviewers read it; the requester doesn't have to. Keep it ≤ 40 non-blank lines.
+Agent-facing: the builder and reviewers read it; the requester doesn't have to. Keep it ≤ 50 non-blank lines.
 
 ## Shape
 
@@ -15,6 +15,12 @@ Agent-facing: the builder and reviewers read it; the requester doesn't have to. 
 
 - `src/app/waitlist/page.tsx` → server component rendering the form
 - `src/app/waitlist/actions.ts` → server action: validate, rate-limit, store
+
+## Tests
+
+- **B1** → unit · `tests/unit/001-waitlist.test.ts` · a valid, new address joins
+- **B2** → unit · `tests/unit/001-waitlist.test.ts` · "abc" is refused with the message
+- **B3** → e2e · `tests/acceptance/001-waitlist.spec.ts` · focus lands on the result after submit
 
 ## Risks
 
@@ -31,6 +37,13 @@ Agent-facing: the builder and reviewers read it; the requester doesn't have to. 
 
 - **Storage** → JSON file under `data/` until a database exists
 ```
+
+## Tests: one level per behavior
+
+- **Shape** → `- **B<k>** → <unit | component | e2e> · <test file> · <what the test proves>`
+- **Level** → the cheapest that can fail when the behavior breaks (../../write-acceptance-tests/references/levels.md)
+- **Unit and component** → the test file is `tests.unit.acceptance`; the code it imports is named in Files
+- **e2e** → at most `tests.e2e_per_spec` per spec; the reason is the third column
 
 ## Decisions: what gets a record
 

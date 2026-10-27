@@ -7,8 +7,9 @@ A kit agent (this plugin's agents/) or a project agent (.claude/agents/) may lis
 frontmatter, relative to the project root, fnmatch-style:
   fence-deny:  writes to matching paths are blocked
   fence-allow: writes to anything not matching are blocked
-`{acceptance}` and `{probes}` in a glob stand for the config's test paths, with every spec and
-lens. Paths are compared by real path, so `/tmp/*` also covers macOS's `/private/tmp`. The main
+`{acceptance}`, `{unit_acceptance}`, `{probes}`, and `{support}` in a glob stand for the config's
+test paths, with every spec and lens; one the config doesn't set stands for `{acceptance}`.
+Paths are compared by real path, so `/tmp/*` also covers macOS's `/private/tmp`. The main
 session, other plugins' agents, and projects without .claude/kit/config.json are not checked.
 Bash is checked only for obvious writes (redirects, sed -i, tee, mv, cp, rm, touch); it's a
 tripwire, not a sandbox.
@@ -25,7 +26,7 @@ from itertools import pairwise
 from pathlib import Path
 from typing import NamedTuple
 
-from kit_config import Config, load_if_set_up, test_glob
+from kit_config import Config, load_if_set_up, relative, test_glob
 
 KIT_AGENTS_DIR = Path(__file__).resolve().parents[1] / "agents"
 KIT_AGENT_PREFIX = "kit:"
@@ -95,8 +96,13 @@ def find_agent_file(agent_type: str, root: Path) -> Path | None:
 
 def load_fence(agent_path: Path, config: Config) -> Fence | None:
     frontmatter = agent_path.read_text().split("\n---", 1)[0]
+    acceptance_glob = test_glob(config.tests.acceptance)
+    unit = config.tests.unit
+    support = config.tests.support
     test_globs = {
-        "{acceptance}": test_glob(config.tests.acceptance),
+        "{acceptance}": acceptance_glob,
+        "{unit_acceptance}": test_glob(unit.acceptance) if unit else acceptance_glob,
+        "{support}": f"{relative(support, config.root)}/*" if support else acceptance_glob,
         "{probes}": test_glob(config.tests.probes),
     }
     for mode in Mode:

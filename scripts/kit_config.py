@@ -31,6 +31,9 @@ ARCHITECTURE_FIELDS = frozenset(
     )
 )
 DEFAULT_MAX_LINES = 250
+DEFAULT_E2E_PER_SPEC = 4
+UNIT_FIELDS = frozenset(("runner", "acceptance", "run"))
+UNIT_RUNNERS = ("vitest", "jest")
 BUILD_FIELDS = frozenset(("mode", "turbo_model"))
 TEXT_CONTRAST = 4.5
 SPEC_MODE_RE = re.compile(r"^mode:\s*(\S+)", re.MULTILINE)
@@ -41,11 +44,20 @@ class ConfigError(Exception):
     """The config is missing or malformed; the message names the field and the fix."""
 
 
+class UnitTests(NamedTuple):
+    runner: str
+    acceptance: str
+    run: str
+
+
 class Tests(NamedTuple):
     runner: str
     acceptance: str
     probes: str
     run: str
+    unit: UnitTests | None
+    support: Path | None
+    e2e_per_spec: int
 
 
 class App(NamedTuple):
@@ -124,6 +136,16 @@ class Config(NamedTuple):
     def acceptance_path(self, spec_id: str) -> Path:
         return self.root / self.tests.acceptance.replace("{spec}", spec_id)
 
+    def unit_acceptance_path(self, spec_id: str) -> Path | None:
+        if self.tests.unit is None:
+            return None
+        return self.root / self.tests.unit.acceptance.replace("{spec}", spec_id)
+
+    def behavior_test_paths(self, spec_id: str) -> list[Path]:
+        """The files holding a spec's behavior tests: end-to-end first, then unit level."""
+        paths = [self.acceptance_path(spec_id), self.unit_acceptance_path(spec_id)]
+        return [path for path in paths if path is not None and path.exists()]
+
     def probe_path(self, spec_id: str, lens: str) -> Path:
         return self.root / self.tests.probes.replace("{spec}", spec_id).replace("{lens}", lens)
 
@@ -175,7 +197,7 @@ def parse(raw: dict, root: Path) -> Config:
         root=root,
         check=required_text(raw, "check"),
         check_full=required_text(raw, "check_full"),
-        tests=parse_tests(raw.get("tests")),
+        tests=parse_tests(raw.get("tests"), root),
         app=parse_app(raw["app"]) if "app" in raw else None,
         screenshots=optional_text(raw, "screenshots"),
         audit=optional_text(raw, "audit"),
@@ -189,7 +211,7 @@ def parse(raw: dict, root: Path) -> Config:
     )
 
 
-def parse_tests(raw_tests: object) -> Tests:
+def parse_tests(raw_tests: object, root: Path) -> Tests:
     if not isinstance(raw_tests, dict):
         message = f"{CONFIG_PATH}: `tests` must be an object with runner, acceptance, probes, run"
         raise ConfigError(message)
@@ -198,6 +220,11 @@ def parse_tests(raw_tests: object) -> Tests:
         acceptance=required_text(raw_tests, "acceptance", "tests."),
         probes=required_text(raw_tests, "probes", "tests."),
         run=required_text(raw_tests, "run", "tests."),
+        unit=parse_unit_tests(raw_tests["unit"]) if "unit" in raw_tests else None,
+        support=root / required_text(raw_tests, "support", "tests.", "a path")
+        if "support" in raw_tests
+        else None,
+        e2e_per_spec=parse_e2e_per_spec(raw_tests.get("e2e_per_spec", DEFAULT_E2E_PER_SPEC)),
     )
     if tests.runner not in RUNNERS:
         message = f"{CONFIG_PATH}: tests.runner must be one of {list(RUNNERS)}"
@@ -212,6 +239,39 @@ def parse_tests(raw_tests: object) -> Tests:
             message = f"{CONFIG_PATH}: tests.{field_name} must contain {', '.join(missing)}"
             raise ConfigError(message)
     return tests
+
+
+def parse_unit_tests(raw_unit: object) -> UnitTests:
+    if not isinstance(raw_unit, dict):
+        message = f"{CONFIG_PATH}: `tests.unit` must be an object with runner, acceptance, run"
+        raise ConfigError(message)
+    unknown_fields = sorted(set(raw_unit) - UNIT_FIELDS)
+    if unknown_fields:
+        message = (
+            f"{CONFIG_PATH}: unknown tests.unit fields {unknown_fields}; see docs/configuration.md"
+        )
+        raise ConfigError(message)
+    unit = UnitTests(
+        runner=required_text(raw_unit, "runner", "tests.unit."),
+        acceptance=required_text(raw_unit, "acceptance", "tests.unit."),
+        run=required_text(raw_unit, "run", "tests.unit."),
+    )
+    if unit.runner not in UNIT_RUNNERS:
+        message = f"{CONFIG_PATH}: tests.unit.runner must be one of {list(UNIT_RUNNERS)}"
+        raise ConfigError(message)
+    for field_name, placeholders in (("acceptance", ("{spec}",)), ("run", ("{files}", "{grep}"))):
+        missing = [name for name in placeholders if name not in getattr(unit, field_name)]
+        if missing:
+            message = f"{CONFIG_PATH}: tests.unit.{field_name} must contain {', '.join(missing)}"
+            raise ConfigError(message)
+    return unit
+
+
+def parse_e2e_per_spec(raw_count: object) -> int:
+    if not isinstance(raw_count, int) or isinstance(raw_count, bool) or raw_count < 1:
+        message = f"{CONFIG_PATH}: tests.e2e_per_spec must be a whole number above 0"
+        raise ConfigError(message)
+    return raw_count
 
 
 def parse_app(raw_app: object) -> App:

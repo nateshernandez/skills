@@ -42,8 +42,8 @@ flowchart TD
   - _Because:_ the UI isn't a security boundary
 - **Suspected issue with no reproduction** → it's a note, with the attack you tried
   - _Because:_ unproven blockers cost rounds and teach the builder to ignore reviews
-- **Probe demonstrates a fix is in place** → keep it; run it with `run_tests.py`
-  - _Because:_ it becomes a regression test in every later gate
+- **A probe fails on a real hole** → keep it, run with `run_tests.py`; delete one that passes
+  - _Because:_ a failing probe is the fix's test and a guard; a passing one only adds gate time
 - **Audit reports high or critical in a runtime dependency** → blocker
   - _Because:_ known exploits are the cheapest attacks
 

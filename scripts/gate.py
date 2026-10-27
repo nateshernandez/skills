@@ -6,7 +6,8 @@ Tests naming a behavior that another unfinished task covers (the current task's 
 are skipped, and so are the `<n>.outcome` probes, which judge the whole feature. The full gate,
 run once per spec after the last review round: `check_full`, then the spec's acceptance tests
 and probes for every delivered behavior. Both run check_tokens.py after the check when the
-config has `design`, and check_shape.py when it has `architecture`.
+config has `design`, check_shape.py when it has `architecture`, and check_tests.py when it has
+`tests.support`.
 
 Each step's output goes to `kit-gate-<spec>-<scope>.log` in the temp dir. A red run prints the
 failed step, that path, the failing test titles, and the log's last lines; read the log, don't
@@ -41,13 +42,14 @@ from kit_config import Config, ConfigError, fill, load, load_if_set_up, relative
 BUILDER_AGENT = "kit:builder"
 CHECK_TOKENS = Path(__file__).resolve().parent / "check_tokens.py"
 CHECK_SHAPE = Path(__file__).resolve().parent / "check_shape.py"
+CHECK_TESTS = Path(__file__).resolve().parent / "check_tests.py"
 OUTPUT_TAIL_LINES = 25
 MAX_LISTED_TESTS = 15
 MAX_CONSECUTIVE_BLOCKS = 3
 MAX_PORT_ATTEMPTS = 100
 PORT_BLOCK_SIZE = 4
 STATUS_BUILDING_RE = re.compile(r"^status:\s*building\s*$", re.MULTILINE)
-ACCEPTANCE_TITLE_RE = re.compile(r"\b(?:test|it)\(\s*[\"'`](\d+\.B\d+)\b")
+ACCEPTANCE_TITLE_RE = re.compile(r"\b(?:test|it)\(\s*[\"'`](\d+\.[BI]\d+)\b")
 ANSI_RE = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
 NOISE_LINE_RE = re.compile(r"^\s*\[WebServer\]|\(node:\d+\)|--trace-warnings")
 FAILURE_TITLE_RES = {
@@ -62,6 +64,7 @@ GateScope = Literal["task", "full"]
 class GateStep(NamedTuple):
     name: str
     command: str
+    runner: str | None = None
 
 
 class GateResult(NamedTuple):
@@ -156,8 +159,11 @@ def block_stop(result: GateResult, counter_path: Path) -> int:
 
 
 def acceptance_test_ids(config: Config, spec_id: str) -> list[str]:
-    test_path = config.acceptance_path(spec_id)
-    return ACCEPTANCE_TITLE_RE.findall(test_path.read_text()) if test_path.exists() else []
+    return [
+        test_id
+        for test_path in config.behavior_test_paths(spec_id)
+        for test_id in ACCEPTANCE_TITLE_RE.findall(test_path.read_text())
+    ]
 
 
 def run_gate(config: Config, spec_id: str, scope: GateScope, task_id: str | None) -> GateResult:
@@ -213,9 +219,24 @@ def gate_steps(
         steps.append(GateStep("design tokens", f"python3 {shlex.quote(str(CHECK_TOKENS))}"))
     if config.architecture:
         steps.append(GateStep("code shape", f"python3 {shlex.quote(str(CHECK_SHAPE))}"))
+    if config.tests.support:
+        steps.append(GateStep("test helpers", f"python3 {shlex.quote(str(CHECK_TESTS))}"))
     test_files = spec_test_files(config, spec_id)
-    if test_files:
-        command = fill(config.tests.run, files=test_files, grep=grep_excluding(skipped_ids))
+    return [*steps, *test_steps(config, spec_id, test_files, grep_excluding(skipped_ids))]
+
+
+def test_steps(config: Config, spec_id: str, test_files: list[str], grep: str) -> list[GateStep]:
+    """One step per runner, unit level first because it answers in seconds."""
+    unit = config.tests.unit
+    unit_path = config.unit_acceptance_path(spec_id)
+    unit_files = [name for name in test_files if unit_path and config.root / name == unit_path]
+    end_to_end_files = [name for name in test_files if name not in unit_files]
+    steps = []
+    if unit and unit_files:
+        command = fill(unit.run, files=unit_files, grep=grep)
+        steps.append(GateStep(f"{spec_id} unit tests", command, unit.runner))
+    if end_to_end_files:
+        command = fill(config.tests.run, files=end_to_end_files, grep=grep)
         steps.append(GateStep(f"{spec_id} tests", command))
     return steps
 
@@ -226,8 +247,8 @@ def load_tasks(config: Config, spec_id: str) -> list[dict]:
 
 
 def spec_test_files(config: Config, spec_id: str) -> list[str]:
-    paths = [config.acceptance_path(spec_id), *config.probe_paths(spec_id)]
-    return [relative(path, config.root) for path in paths if path.exists()]
+    paths = [*config.behavior_test_paths(spec_id), *config.probe_paths(spec_id)]
+    return [relative(path, config.root) for path in paths]
 
 
 def undelivered_behavior_ids(tasks: list[dict]) -> list[str]:
@@ -293,7 +314,7 @@ def run_steps(config: Config, steps: list[GateStep], log_path: Path) -> GateResu
         log_start = log_path.stat().st_size
         if run_step(config.root, step, step_env, log_path) != 0:
             step_output = log_path.read_bytes()[log_start:].decode(errors="replace")
-            report = summarize_output(step_output, config.tests.runner)
+            report = summarize_output(step_output, step.runner or config.tests.runner)
             return GateResult(step.name, report.tail, report.test_titles, log_path)
     return GateResult(None, "")
 

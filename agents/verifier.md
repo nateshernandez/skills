@@ -9,6 +9,7 @@ skills:
   - verify-spec
 fence-allow:
   - "{probes}"
+  - "{support}"
   - "specs/*/reviews/quality-r*.md"
   - "specs/*/screens/*"
   - "/tmp/*"

@@ -12,3 +12,5 @@ Acceptance tests prove the path the spec names. Probes try the paths next to it.
 - **Interfaces without a screen** → wrong types, missing fields, out-of-order calls, concurrent callers
 
 Title each probe `<n>.B<k> probe: <what it tries>` with the full ID, so findings and the report can point at it.
+
+A probe is a question, not a test to keep: run it, and delete it if the behavior held. Only a failing probe stays, because the fix and every later gate need it.

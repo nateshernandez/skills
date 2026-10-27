@@ -15,7 +15,10 @@ Fill each config value from the project's files. Ask the requester only when two
 - **`playwright.config.*` or `@playwright/test` in devDependencies** → Playwright preset
 - **`vitest.config.*` or `vitest` in devDependencies** → Vitest preset
 - **`jest.config.*`, a `jest` key in package.json, or `jest` in devDependencies** → Jest preset
-- **Playwright and a unit runner both present** → Playwright for acceptance tests; the unit runner stays in `check`
+- **Playwright and Vitest or Jest both present** → Playwright preset, whose `tests.unit` names the unit runner; its tests run in `check`
+- **Playwright only** → keep the preset's `tests.unit`, and offer to add Vitest; without it, delete `tests.unit` and every behavior is end to end
+- **`tests.support`** → `tests/support`, created empty; the dev server, auth, and fixture helpers go there once, and `check_tests.py` fails a copy
+- **A browser test starts its own dev server** → one Playwright `webServer` entry in the config, never a helper copied into test files
 - **None** → ask which to add; installing one is a change the requester approves
 
 ## Commands
@@ -24,7 +27,8 @@ Fill each config value from the project's files. Ask the requester only when two
   - Read `.github/workflows/*` when present; it's the best record of what must pass
   - A project script named `check` or `verify` that already does this → use it as is
 - **`check_full`** → `check` plus every slower suite: e2e, visual, accessibility
-- **`tests.run`** → keep `{files}` and `{grep}`; kit fills and shell-quotes both
+- **`tests.run`, `tests.unit.run`** → keep `{files}` and `{grep}`; kit fills and shell-quotes both
+- **`check`** → includes the unit runner (`pnpm test`) so every task gate runs all unit tests in seconds
 - **`audit`** → leave out when the project has no runtime dependencies
 
 ## App

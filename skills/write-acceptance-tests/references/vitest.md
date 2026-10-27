@@ -39,3 +39,21 @@ describe("1 waitlist", () => {
 
 - The gate filters by title with `-t`, so the ID must be in the `test()` title itself, not only in `describe`
 - A `describe` around a spec's tests is fine; keep the ID at the start of each test title
+
+## At unit level in a project with a browser runner
+
+When the config has `tests.unit`, behaviors proven below the browser go in `tests.unit.acceptance`, one file per spec, written the same way. The planned module paths come from plan.md's Files; the import fails until the builder creates them, which is the red state.
+
+```ts
+import { describe, expect, test } from "vitest";
+import { nextQuoteStatus } from "../../src/modules/quotes/domain/quote-status";
+
+describe("4 quote status", () => {
+  test("4.B3 Quote sent to the client is marked sent", () => {
+    expect(nextQuoteStatus("draft", "send")).toEqual({ ok: true, status: "sent" });
+  });
+});
+```
+
+- Import the planned entry the plan names, never a private helper
+- Setup shared with another test file goes in `tests.support`; read it before writing your own

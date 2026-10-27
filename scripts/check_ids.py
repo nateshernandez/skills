@@ -75,7 +75,7 @@ def live_files(spec_dir: Path, config: Config) -> list[Path]:
         spec_dir / "tasks.json",
         spec_dir / "plan.md",
         spec_dir / "report.md",
-        config.acceptance_path(spec_id),
+        *config.behavior_test_paths(spec_id),
         *config.probe_paths(spec_id),
     ]
     return [path for path in candidates if path.exists()]

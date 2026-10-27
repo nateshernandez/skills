@@ -26,7 +26,7 @@ The requested feature ships working, passes every lens, and comes back as a one-
 flowchart TD
   A["spec_status.py: resume from the files"] --> B{"Spec approved?"}
   B -- "no: write-spec; requester approves" --> B
-  B -- yes --> D["planner: plan.md, tasks.json"] --> E["test-author: failing acceptance tests"] --> F["builder: next task"]
+  B -- yes --> D["planner: plan.md, tasks.json"] --> E["test-author: failing behavior tests"] --> F["builder: next task"]
   F --> G{"All tasks pass?"}
   G -- no --> F
   G -- yes --> H["review_app.py start; reviewers in parallel"]

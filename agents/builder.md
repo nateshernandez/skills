@@ -12,6 +12,7 @@ fence-deny:
   - "specs/*/tasks.json"
   - "specs/*/reviews/*"
   - "{acceptance}"
+  - "{unit_acceptance}"
   - "{probes}"
   - ".claude/*"
 ---

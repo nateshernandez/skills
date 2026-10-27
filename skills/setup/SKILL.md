@@ -18,7 +18,7 @@ A green gate, kit's folders, and a CLAUDE.md section, so `/kit:build` works on t
 ## Out
 
 - `.claude/kit/config.json`, from a preset in assets/
-- `specs/` and `docs/decisions/`, each with a `.gitkeep`
+- `specs/`, `docs/decisions/`, and `tests.support` when set, each with a `.gitkeep`
 - The section in assets/claude-md-section.md, added to CLAUDE.md
 - `.claude/rules/git-commits.md` from assets/, unless the project already sets commit conventions
 - `tests/kit/ux-checks.ts` from assets/, when the project has a UI tested with Playwright
