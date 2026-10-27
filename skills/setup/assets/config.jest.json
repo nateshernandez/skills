@@ -15,5 +15,8 @@
   "lint": {
     "extensions": [".ts", ".tsx", ".js", ".mjs"],
     "run": "node_modules/.bin/eslint --no-warn-ignored {file}"
+  },
+  "build": {
+    "worktree_setup": "pnpm install --frozen-lockfile --prefer-offline"
   }
 }

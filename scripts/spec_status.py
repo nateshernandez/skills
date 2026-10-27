@@ -4,7 +4,8 @@
 Usage:
   spec_status.py            one line per spec, in number order: id, status, tasks done
   spec_status.py SPEC       detail for one spec (`001-track` or just `1`): build mode, next
-                            task, latest review verdicts, report
+                            task, tasks ready to build side by side, latest review verdicts,
+                            report
 
 A spec's mode is its `mode:` field, else `build.mode` in the config, else standard.
 """
@@ -16,6 +17,7 @@ from pathlib import Path
 from typing import NamedTuple
 
 from kit_config import DEFAULT_BUILD, ConfigError, load_if_set_up, project_root, spec_mode
+from task_graph import parse_tasks, ready_tasks
 
 SPECS_DIR = project_root() / "specs"
 STATUS_RE = re.compile(r"^status:\s*(\S+)", re.MULTILINE)
@@ -74,6 +76,7 @@ def detail(spec_dir: Path) -> str:
     lines.append(
         f"next task: {next_task.task_id} {next_task.title}" if next_task else "next task: none"
     )
+    lines.append(f"ready now: {ready_line(spec_dir)}")
     reviews = latest_reviews(spec_dir)
     if reviews:
         lines.append(f"review round {reviews[0].round_number}:")
@@ -82,6 +85,17 @@ def detail(spec_dir: Path) -> str:
         lines.append("reviews: none yet")
     lines.append("report: written" if (spec_dir / "report.md").exists() else "report: not yet")
     return "\n".join(lines)
+
+
+def ready_line(spec_dir: Path) -> str:
+    tasks_path = spec_dir / "tasks.json"
+    if not tasks_path.exists():
+        return "none"
+    ready_ids = [
+        task.task_id
+        for task in ready_tasks(parse_tasks(json.loads(tasks_path.read_text())["tasks"]))
+    ]
+    return ", ".join(ready_ids) or "none"
 
 
 def mode_line(spec_dir: Path) -> str:

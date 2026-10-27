@@ -32,9 +32,10 @@ ARCHITECTURE_FIELDS = frozenset(
 )
 DEFAULT_MAX_LINES = 250
 DEFAULT_E2E_PER_SPEC = 4
+DEFAULT_PARALLEL = 3
 UNIT_FIELDS = frozenset(("runner", "acceptance", "run"))
 UNIT_RUNNERS = ("vitest", "jest")
-BUILD_FIELDS = frozenset(("mode", "turbo_model"))
+BUILD_FIELDS = frozenset(("mode", "turbo_model", "parallel", "worktree_setup"))
 TEXT_CONTRAST = 4.5
 SPEC_MODE_RE = re.compile(r"^mode:\s*(\S+)", re.MULTILINE)
 CONTRAST_PAIR_RE = re.compile(r"^([\w-]+) on ([\w-]+)(?: (\d+(?:\.\d+)?))?$")
@@ -106,9 +107,13 @@ BuildMode = Literal["standard", "turbo"]
 class Build(NamedTuple):
     mode: BuildMode
     turbo_model: str | None
+    parallel: int
+    worktree_setup: str | None
 
 
-DEFAULT_BUILD = Build(mode="standard", turbo_model=None)
+DEFAULT_BUILD = Build(
+    mode="standard", turbo_model=None, parallel=DEFAULT_PARALLEL, worktree_setup=None
+)
 
 
 class Config(NamedTuple):
@@ -159,13 +164,39 @@ def test_glob(template: str) -> str:
 
 
 def project_root() -> Path:
-    """The project being worked on: Claude Code's project dir, else the enclosing git repo."""
+    """The project being worked on: the linked worktree we're in, else Claude Code's project dir,
+    else the enclosing git repo.
+
+    A parallel builder's hooks and scripts get CLAUDE_PROJECT_DIR of the main checkout, but its
+    files and gate belong to its own worktree.
+    """
+    if worktree_root := linked_worktree_root(Path.cwd().resolve()):
+        return worktree_root
     if project_dir := os.environ.get("CLAUDE_PROJECT_DIR"):
         return Path(project_dir).resolve()
     completed = subprocess.run(
         ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, check=False
     )
     return Path(completed.stdout.strip() or ".").resolve()
+
+
+def linked_worktree_root(start: Path) -> Path | None:
+    """The root of the `git worktree add` checkout containing `start`; None in a main checkout."""
+    for directory in (start, *start.parents):
+        git_entry = directory / ".git"
+        if git_entry.is_file():
+            is_linked = "/worktrees/" in git_entry.read_text().replace("\\", "/")
+            return directory if is_linked else None
+        if git_entry.exists():
+            return None
+    return None
+
+
+def main_checkout_root(worktree_root: Path) -> Path:
+    """Where a linked worktree's main checkout lives, read from its `.git` file."""
+    gitdir_line = (worktree_root / ".git").read_text().strip()
+    gitdir = Path(gitdir_line.removeprefix("gitdir:").strip())
+    return gitdir.parent.parent.parent
 
 
 def load(root: Path | None = None) -> Config:
@@ -362,7 +393,7 @@ def split_theme_flag(arguments: list[str]) -> tuple[ThemeName | None, list[str]]
 
 def parse_build(raw_build: object) -> Build:
     if not isinstance(raw_build, dict):
-        message = f"{CONFIG_PATH}: `build` must be an object with mode and turbo_model"
+        message = f"{CONFIG_PATH}: `build` must be an object; see docs/configuration.md"
         raise ConfigError(message)
     unknown_fields = sorted(set(raw_build) - BUILD_FIELDS)
     if unknown_fields:
@@ -378,7 +409,11 @@ def parse_build(raw_build: object) -> Build:
     ):
         message = f'{CONFIG_PATH}: build.turbo_model must be a model name like "sonnet"'
         raise ConfigError(message)
-    return Build(mode, turbo_model)
+    parallel = raw_build.get("parallel", DEFAULT_BUILD.parallel)
+    if not isinstance(parallel, int) or isinstance(parallel, bool) or parallel < 1:
+        message = f"{CONFIG_PATH}: build.parallel must be a whole number above 0"
+        raise ConfigError(message)
+    return Build(mode, turbo_model, parallel, optional_text(raw_build, "worktree_setup"))
 
 
 def parse_contrast(raw_pairs: object) -> tuple[ContrastPair, ...]:

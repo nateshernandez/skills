@@ -45,3 +45,11 @@ Fill each config value from the project's files. Ask the requester only when two
 - **ESLint installed** → `lint` with the extensions in its config
 - **Biome** → one command for both: `format.run` as `node_modules/.bin/biome check --write {file}`, and no `lint`
 - Call binaries through `node_modules/.bin/`; it starts faster than the package manager
+
+## Parallel builds
+
+- **`build.worktree_setup`** → what a fresh git worktree needs before it can build, run from its root
+  - **Node project** → the install command that honors the lockfile, like `pnpm install --frozen-lockfile --prefer-offline`; `npm ci`, `yarn install --immutable`, or `bun install --frozen-lockfile` for the others
+  - **Local files the app reads** → copy them from `$KIT_MAIN_ROOT`, like `cp "$KIT_MAIN_ROOT/.env.local" .env.local`
+  - **Nothing to install** → leave it out
+- **`build.parallel`** → the most builders at once; leave it out for 3, or set 1 on a machine or app too heavy for side-by-side gates

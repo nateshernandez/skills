@@ -40,6 +40,8 @@ Every command runs from the project root through your shell. Unknown fields are 
 | `architecture.max_lines` | no | The most lines a source file may have; 250 when left out. Test files are exempt |
 | `architecture.baseline` | no | Where `check_shape.py --write-baseline` records an existing app's files, such as `.claude/kit/architecture-baseline.json` |
 | `build.mode` | no | `standard` (the default) or `turbo`; how `/kit:build` runs a spec that doesn't name its own mode |
+| `build.parallel` | no | The most builders at once when a plan has independent tasks; 3 when left out, 1 builds one at a time |
+| `build.worktree_setup` | no | Command that makes a fresh git worktree buildable, run from its root with `KIT_MAIN_ROOT` set, such as `pnpm install --frozen-lockfile --prefer-offline` |
 | `build.turbo_model` | no | Model for a turbo build's test author, builders, and verifier, such as `sonnet`; unset, they use the session's model |
 
 ## Test levels
@@ -141,7 +143,7 @@ A standard build plans the spec, runs one builder per task, and reviews it throu
 | Spec, prototype, and your approval | ✓ | ✓ |
 | Planner: plan, threat model, decisions to record | ✓ | ✗ one task covering every behavior |
 | Failing acceptance tests, written before code | ✓ | ✓ |
-| Builders | one per task | one for the spec |
+| Builders | one per task, side by side when tasks are independent | one for the spec |
 | Task gate and stop gate, including the design and shape checks | ✓ | ✓ |
 | Verifier | ✓ | ✓ |
 | Security reviewer, when input, storage, auth, or secrets change | ✓ | ✓ |
@@ -160,6 +162,27 @@ Pick the mode per build with `/kit:build --turbo <request>` or `--standard`, or 
 The mode is written into the spec's frontmatter as `mode:`, so you see it when you approve and a resumed build keeps it. A turbo report lists what it skipped under Skipped. To run the skipped reviews before merging, resume with `/kit:build <id> --standard`; it reviews the build as round 2.
 
 `turbo_model` applies only to turbo builds, and never to the security reviewer. It takes whatever the Agent tool accepts: an alias such as `sonnet` or `haiku`, or a full model ID.
+
+## Parallel builds
+
+A standard build whose plan lists `needs` and `files` on each task builds independent tasks side by side. Each builder works in its own git worktree on its own branch, with its own gate and port, and the orchestrator lands finished tasks onto the spec's branch one by one, so history stays linear.
+
+- **`build.worktree_setup`** is what a fresh worktree needs before it can build: dependencies, and local files that aren't in git. `KIT_MAIN_ROOT` is the main checkout, so a setup can copy from it:
+
+  ```json
+  "build": {
+    "parallel": 3,
+    "worktree_setup": "pnpm install --frozen-lockfile --prefer-offline && cp \"$KIT_MAIN_ROOT/.env.local\" .env.local"
+  }
+  ```
+
+- **`check_tasks.py`** fails a plan in which two tasks that may run together write the same path
+- **`mark_task.py`** fails a task that changed a file it didn't list, before its gate runs
+- **Gates and ports** are per worktree, so concurrent gates don't wait on each other or share a server
+- **Landing** is `land_task.py`: it checks the task passed in its worktree and stayed within its `files`, replays its commits on the spec's branch, and removes the worktree. After each wave one gate runs on the merged tree
+- **A task list with no `needs` or `files`** is sequential, and a turbo or size S build always uses one builder
+
+Set `build.parallel` to 1 to turn waves off.
 
 ## Deck style
 

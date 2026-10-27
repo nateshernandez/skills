@@ -61,7 +61,7 @@ flowchart LR
 1. **Spec.** `specs/001-waitlist/spec.md`: an outcome line, decisions (`1.D1`), behaviors (`1.B1`), and what's out of scope. UI features also get a static prototype and screenshots.
 2. **Design and plan.** When the spec fixes a data model, protocol, state machine, or contract, a designer writes `design.md` first and you approve it. A planner then writes `plan.md` and `tasks.json`: vertical slices, each of which leaves the app working.
 3. **Tests.** A test author writes one test per behavior, at the cheapest level that proves it (unit unless a browser is the point), and confirms each one fails.
-4. **Build.** One builder per task, each with fresh context. `mark_task.py` runs the gate and marks the task done only when it's green.
+4. **Build.** One builder per task, each with fresh context; tasks that don't touch the same files build side by side in separate git worktrees. `mark_task.py` runs the gate and marks the task done only when it's green.
 5. **Review.** A verifier, plus code, security, and UX reviewers as the change calls for, each write findings with evidence. Blockers become fix tasks, for up to three rounds.
 6. **Report.** `report.md` marks each behavior ✓ or ✗ and lists what was decided without you, what was codified, and how to try it.
 
@@ -201,7 +201,7 @@ Or turn on auto-update for the `nateshernandez` marketplace under **Marketplaces
 
 ## Good to know
 
-- **Cost.** A medium feature runs a planner, a test author, one builder per task, and two to four reviewers per round. Use it for features, not one-line fixes.
+- **Cost.** A medium feature runs a planner, a test author, one builder per task (several at once when the plan allows), and two to four reviewers per round. Use it for features, not one-line fixes.
 - **Small changes.** Size `S` specs skip the planner and run a single task.
 - **Turbo mode.** `/kit:build --turbo <request>` keeps the spec, your approval, the tests, the gates, and the verifier, but runs one builder and one review round, with no code or UX review. Set `build.mode` to make it the default; see [Build modes](docs/configuration.md#build-modes).
 - **Your stack's conventions.** kit reads your CLAUDE.md, `.claude/rules/`, and decision records. Put stack-specific review checks in `.claude/kit/checklists/<lens>.md`.

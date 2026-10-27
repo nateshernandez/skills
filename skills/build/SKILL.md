@@ -46,8 +46,8 @@ flowchart TD
   - _Because:_ these shapes are costly to reverse, and the plan and parallel tasks build against them
 - **Size S** → skip the planner; write a one-task tasks.json and run `check_tasks.py` on it
   - _Because:_ planning a one-task change costs more than the change
-- **Delegating** → pass only the spec ID, task ID, and round; run one builder at a time
-  - _Because:_ fresh context keeps reviews independent; builders share one tree and gate
+- **Delegating** → pass only the spec ID, task ID, and round; build every ready task as a wave (references/parallel.md)
+  - _Because:_ fresh context keeps reviews independent; worktrees let independent tasks finish together
 - **Choosing reviewers** → verifier and code-reviewer always; ux-reviewer if UI changed and `screenshots` is set; security-reviewer if input, storage, auth, or secrets changed
   - _Because:_ each reviewer costs a full context; run those with something to check
 - **Builder reports blocked** → fix the plan, tasks, or tests yourself, or ask the requester
@@ -77,4 +77,5 @@ flowchart TD
 
 - [references/artifacts.md](references/artifacts.md): every file in `specs/<id>/`, task list, findings, report, codify
 - [assets/report-template.md](assets/report-template.md): blank report to copy
+- [references/parallel.md](references/parallel.md): building ready tasks side by side, and landing them
 - [references/turbo.md](references/turbo.md): picking the mode; the faster mode: what it cuts, keeps, and reports

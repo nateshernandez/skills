@@ -62,3 +62,11 @@ Agent-facing: the builder and reviewers read it; the requester doesn't have to. 
 - What's secret? Server-only values never reach clients, logs, or error messages
 - What can be abused? Repeats, large inputs, enumeration
 - Each answer becomes a behavior already in the spec (cite its ID) or a Flag
+
+## tasks.json: needs and files
+
+- **`needs`** → task ids that must pass first; `[]` for a task that needs none
+- **`files`** → every path the task writes: a file, or a folder ending in `/`; its colocated tests come with it
+- **T1** → the shared surface: types and stubs from design.md's Interfaces, dependencies, registries, config; later tasks add files and touch none of these
+- **Cut along** → design.md's Interfaces, or a screen, a use case, a route; a task that edits a file another could edit needs the other in `needs`
+- **A path no task lists** → no builder may write it; add it to the task that needs it
