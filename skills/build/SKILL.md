@@ -33,7 +33,7 @@ flowchart TD
   G -- yes --> H["review_app.py start; reviewers in parallel"]
   H --> I{"Blockers and round < 3?"}
   I -- "yes: blockers become F tasks" --> F
-  I -- no --> K["Full gate, once per spec"] --> J["Codify (references/artifacts.md); write report.md"]
+  I -- no --> K["Promote probes; full gate, once per spec"] --> J["Codify (references/artifacts.md); write report.md"]
 ```
 
 ## Rules
@@ -52,8 +52,8 @@ flowchart TD
   - _Because:_ each reviewer costs a full context; run those with something to check
 - **Builder reports blocked** → fix the plan, tasks, or tests yourself, or ask the requester
   - _Because:_ a wrong locked file is a planning error, not the builder's to patch
-- **No blockers left** → `gate.py <id> --full` once; red → F task per failing test, one rerun, then blocked
-  - _Because:_ only the full check catches a break elsewhere; once at the end pays once
+- **No blockers left** → promote kept probes to unit tests (references/artifacts.md), then `gate.py <id> --full` once; red → F task per failing test, one rerun, then blocked
+  - _Because:_ only the full check catches a break elsewhere, and it should run against the tests that stay
 - **Reviewers finish** → `review_app.py stop`; revert edits outside their fences; commit findings, screens, and probes once
   - _Because:_ one commit per round keeps the log readable
 - **Blockers remain after round 3** → set `status: blocked`; report each ✗ with one question
@@ -64,7 +64,7 @@ flowchart TD
 ## Done When
 
 - [ ] `spec_status.py <id>` shows every task passing
-- [ ] Latest round: every verdict is `pass`, or the spec is `blocked`
+- [ ] Latest round: every verdict is `pass`, or the spec is `blocked`; no probe file is left
 - [ ] Report lints, `check_ids.py <id>` and `check_decisions.py` pass, spec is `done` or `blocked`, all committed
 - [ ] Requester has the report
 

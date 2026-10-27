@@ -23,8 +23,8 @@ Everything the build skill says still holds, except where a rule here replaces i
   - _Because:_ one builder does the work of several, so passing 8 minutes is normal here
 - **Choosing reviewers** → the verifier always; security-reviewer by the standard rule; never code-reviewer or ux-reviewer
   - _Because:_ the verifier proves behaviors in the running app; a security miss costs the most
-- **Round 1 has blockers** → one `F1` task covering them all, one builder, then the full gate; no round 2
-  - _Because:_ the fix is held to the gate and to the probes that found each blocker
+- **Round 1 has blockers** → one `F1` task covering them all, one builder, then `F2` to promote the probes (SKILL.md), then the full gate; no round 2
+  - _Because:_ the fix is held to the gate and to the probes that found each blocker, and the probes end as unit tests
 - **`F1` reports blocked, or the full gate is still red after its one fix** → set `status: blocked`; report each ✗ with one question
   - _Because:_ turbo has no later round to converge in
 - **Checking Done When** → round 1's `fail` verdicts count as answered once `F1` passes and the full gate is green
