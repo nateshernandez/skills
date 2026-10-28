@@ -225,6 +225,7 @@ kit fills these in and shell-quotes each value, so don't add quotes around them.
 | Variable | When | Use it for |
 | --- | --- | --- |
 | `KIT_PORT` | Every gate run and reviewer test run | A free port, with the next three also free. Point your test server at it, so a gate never reuses a stale server |
+| `KIT_BUILT` | Every gate step after `check` or `check_full` passes | `1`, meaning that command's build is fresh. Let your test server skip its own build; a `check` that doesn't build must not rely on it |
 | `KIT_APP_URL` | Reviewer test runs, when `app` is set | The shared review app's URL |
 | `NO_COLOR` | Every gate run | Keeps color codes out of the failing-test titles kit reports |
 
@@ -236,7 +237,7 @@ const port = Number(process.env.KIT_PORT ?? 3000);
 export default defineConfig({
   use: { baseURL: process.env.KIT_APP_URL ?? `http://localhost:${port}` },
   webServer: {
-    command: `pnpm build && pnpm start --port ${port}`,
+    command: `${process.env.KIT_BUILT ? "" : "pnpm build && "}pnpm start --port ${port}`,
     port,
     reuseExistingServer: process.env.REUSE_SERVER === "1",
   },
