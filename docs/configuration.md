@@ -9,7 +9,7 @@ Every command runs from the project root through your shell. Unknown fields are 
 | Field | Required | What it is |
 | --- | --- | --- |
 | `check` | yes | The fast gate every task must pass: format check, lint, types, unit tests, build |
-| `check_full` | yes | Everything, run once per spec after the last review round: `check` plus e2e, visual, and other slow suites |
+| `check_full` | yes | Run once per spec after the last review round: `check` plus visual, accessibility, and other slow suites that aren't the spec's own tests; the gate runs those after it |
 | `tests.runner` | yes | `playwright`, `vitest`, or `jest`; picks the test style agents write and how failures are read |
 | `tests.acceptance` | yes | Where a spec's end-to-end acceptance tests go; must contain `{spec}` |
 | `tests.probes` | yes | Where reviewers' probes go; must contain `{spec}` and `{lens}` |
@@ -73,7 +73,7 @@ Every gate runs the tests, so a behavior gets the cheapest test that can fail wh
 }
 ```
 
-Put the unit runner in `check` so the task gate runs every unit test, and keep the whole end-to-end suite in `check_full` or CI, sharded.
+Put the unit runner in `check` so the task gate runs every unit test, and keep the whole end-to-end suite out of both: the gates run only the spec's own tests, so run the full suite in CI, sharded, to catch a spec breaking an earlier one.
 
 ## Design
 
@@ -250,7 +250,7 @@ A Next.js app tested with Playwright:
 ```json
 {
   "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
-  "check_full": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm exec playwright test",
+  "check_full": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
   "tests": {
     "runner": "playwright",
     "acceptance": "tests/acceptance/{spec}.spec.ts",

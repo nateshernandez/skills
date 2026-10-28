@@ -75,7 +75,7 @@ The builder never marks its own task done. `mark_task.py` runs the **task gate**
 4. `check_tests.py`, when the config has `tests.support`: no helper copied between test files
 5. The spec's behavior tests (unit level first, then end to end) and probes, minus behaviors that later tasks will build, and minus the whole-feature `outcome` probes
 
-The **full gate** runs once per spec, after the last review round: `check_full`, the same checks, then every delivered behavior's tests and the outcome probes.
+The **full gate** runs once per spec, after the last review round: `check_full`, the same checks, then every delivered behavior's tests and the outcome probes. Neither gate runs other specs' tests; run the whole suite in CI.
 
 Both gates log to a temp file and print only the failing test titles and the log's tail. A green run stamps the working tree, so rerunning on an unchanged tree returns at once. When a builder tries to stop with a red gate, the stop hook sends it back, at most three times in a row.
 

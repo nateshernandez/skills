@@ -1,6 +1,6 @@
 {
   "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
-  "check_full": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm exec playwright test",
+  "check_full": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
   "tests": {
     "runner": "playwright",
     "acceptance": "tests/acceptance/{spec}.spec.ts",
