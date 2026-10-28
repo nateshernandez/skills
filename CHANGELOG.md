@@ -2,6 +2,11 @@
 
 What each release of kit changes for the people using it. Newest first.
 
+## 0.8.0 (2026-10-27)
+
+- **Changed** the Playwright preset's `check_full`: it no longer runs the whole e2e suite, since the full gate already runs the spec's own tests; run every spec's tests in CI, and drop `playwright test` from `check_full` in an existing config to match
+- **Changed** the gate: test steps get `KIT_BUILT=1` once `check` passes, so a Playwright `webServer` can skip its second `pnpm build`; read it in `playwright.config.ts` if your `check` builds
+
 ## 0.7.0 (2026-10-27)
 
 - **Changed** `/kit:build`: before the full gate, the probes that found a defect become unit tests beside their code and the probe files are deleted, so you no longer have to ask for it; a probe only a real browser can prove stays and is listed in the report
