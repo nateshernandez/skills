@@ -13,6 +13,7 @@ Each step's output goes to `kit-gate-<spec>-<scope>.log` in the temp dir. A red 
 failed step, that path, the failing test titles, and the log's last lines; read the log, don't
 rerun the gate. A green run stamps the working tree; a rerun on the same tree is skipped. Gates
 run one at a time, and each gets a free port in KIT_PORT so a test server is never a stale one.
+Once `check` passes, the later steps get KIT_BUILT=1, so a test server can skip a second build.
 
 Usage:
   gate.py SPEC_ID          task gate for one spec; exit 1 when red
@@ -307,7 +308,9 @@ def git(root: Path, git_args: list[str], git_env: dict[str, str]) -> str:
 
 def run_steps(config: Config, steps: list[GateStep], log_path: Path) -> GateResult:
     # NO_COLOR keeps ANSI codes out of test titles; FORCE_COLOR would override it.
-    step_env = {key: value for key, value in os.environ.items() if key != "FORCE_COLOR"}
+    step_env = {
+        key: value for key, value in os.environ.items() if key not in ("FORCE_COLOR", "KIT_BUILT")
+    }
     step_env |= {"KIT_PORT": str(free_port()), "NO_COLOR": "1"}
     log_path.write_bytes(b"")
     for step in steps:
@@ -316,6 +319,8 @@ def run_steps(config: Config, steps: list[GateStep], log_path: Path) -> GateResu
             step_output = log_path.read_bytes()[log_start:].decode(errors="replace")
             report = summarize_output(step_output, step.runner or config.tests.runner)
             return GateResult(step.name, report.tail, report.test_titles, log_path)
+        # The first step is `check` or `check_full`, which ends with the build the tests serve.
+        step_env["KIT_BUILT"] = "1"
     return GateResult(None, "")
 
 

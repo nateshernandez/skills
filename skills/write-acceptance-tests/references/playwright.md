@@ -49,4 +49,5 @@ test("1.B4 Viewed at 375px wide", async ({ page }) => {
 ## Servers
 
 - The gate puts a free port in `KIT_PORT`; let `webServer.port` and `use.baseURL` read it, so every gate gets a fresh server
+- The gate sets `KIT_BUILT=1` once `check` has built the app; let `webServer.command` skip `pnpm build` when it's set
 - During review, `app.env` from the config is set (for example `REUSE_SERVER=1`), and `KIT_APP_URL` holds the shared app's URL
