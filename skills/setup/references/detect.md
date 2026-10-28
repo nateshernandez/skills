@@ -26,7 +26,8 @@ Fill each config value from the project's files. Ask the requester only when two
 - **`check`** → the scripts CI runs, minus browser tests: format check, lint, typecheck, unit tests, build
   - Read `.github/workflows/*` when present; it's the best record of what must pass
   - A project script named `check` or `verify` that already does this → use it as is
-- **`check_full`** → `check` plus every slower suite: e2e, visual, accessibility
+- **`check_full`** → `check` plus slower suites that aren't a spec's own tests: visual, accessibility
+  - Never the whole e2e suite; the gate runs each spec's e2e tests after it, and cross-spec regressions are CI's job
 - **`tests.run`, `tests.unit.run`** → keep `{files}` and `{grep}`; kit fills and shell-quotes both
 - **`check`** → includes the unit runner (`pnpm test`) so every task gate runs all unit tests in seconds
 - **`audit`** → leave out when the project has no runtime dependencies
